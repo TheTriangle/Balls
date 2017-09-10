@@ -6,7 +6,9 @@ class BallChar
     char namech [16] = {};
     int hitnumch = 0;
     };
-void SortBallsCharacteristics (BallChar chars[], int left, int right);
+
+void printchars (BallChar chars[], int left, int right);
+int SortBallsCharacteristics (BallChar chars[], int left, int right);
 bool standsright (BallChar chars[], int tests, int mid);
 void change (BallChar chars[], int first, int second);
 class Ball
@@ -16,10 +18,11 @@ class Ball
     POINT cords;
     double radius;
     double angle;
-    char name[];
+    char name[16];
     double speed;
     int hitcounter;
     public:
+    BallChar thisChars; //TODO перенести под спец.дост.private
     bool testWallHit ()
         {
         if (cords.x + radius > txGetExtentX())
@@ -29,6 +32,7 @@ class Ball
             else angle = -180 - angle;
             return true;
             hitcounter++;
+            thisChars.hitnumch++;
             }
         if (cords.x - radius < 0)
             {
@@ -36,6 +40,7 @@ class Ball
             if (angle >= 0) angle = 180 - angle;
             else angle = -180 - angle;
             hitcounter++;
+            thisChars.hitnumch++;
             return true;
             }
         if (cords.y + radius > txGetExtentY())
@@ -43,6 +48,7 @@ class Ball
             cords.y = txGetExtentY() - radius;
             angle = -angle;
             hitcounter++;
+            thisChars.hitnumch++;
             return true;
             }
         if (cords.y - radius < 0)
@@ -50,16 +56,24 @@ class Ball
             cords.y = radius;
             angle = -angle;
             hitcounter++;
+            thisChars.hitnumch++;
             return true;
             }
         return false;
         }
+    void setName (char newname[])
+        {
+        *name = *newname;
+        *(thisChars.namech) = *newname;
+        }
+
     void draw ()
         {
-        txSelectFont ("Times New Roman", 30);
+        txSelectFont ("Times New Roman", 18);
         txSetFillColor (ballcolor);
+        txSetColor (TX_WHITE, 1);
         txCircle (cords.x, cords.y, radius);
-        txDrawText (cords.x - radius - 15, cords.y - radius - 25, cords.x + radius + 15, cords.y - radius - 15, name);
+        txDrawText (cords.x - radius - 65, cords.y - radius - 25, cords.x + radius + 65, cords.y - radius - 15, name);
         txSetColor (RGB (200, 200, 200), 5);
         txLine (cords.x, cords.y,  cords.x + speed * cos(angle * DEGREEMODIFIER) * 10, cords.y - speed * sin(angle * DEGREEMODIFIER) * 5);
         }
@@ -73,6 +87,7 @@ class Ball
         ballcolor = fcolor;
         *name = *gname;
         hitcounter = 0;
+        *(thisChars.namech) = *gname;
         }
     Ball (double xc, double yc, double rad, double ang, double spd, COLORREF fcolor, int number)
         {
@@ -84,6 +99,7 @@ class Ball
         ballcolor = fcolor;
         sprintf (name, "%d", number);
         hitcounter = 0;
+        sprintf (thisChars.namech, "%d", number);
         }
     Ball ()
         {}
@@ -109,32 +125,87 @@ class Ball
     };
 
 
-void SortBallsCharacteristics (BallChar chars[], int left, int right)
+int SortBallsCharacteristics (BallChar chars[], int left, int right)
     {
+    //printf ("AAAAAAAAAA");
+    //txSleep (1000);
+    int hleft = left;
+    int hright = right;
+    if (right <= left) return 0;
+    if (right == left + 1)
+        {
+        if (chars[left].hitnumch > chars[right].hitnumch)
+            {
+            change (chars, left, right);
+            }
+        return 0;
+        }
+    //printchars (chars, left, right);
     int help;
-    int midel = right - left/2;
+    int midel = left + (right - left)/2;
     int midnum;
+
     while (left <= right)
         {
-        printf ("%d <= %d\n", left, right);
+     //   printf ("\nleft(%d) <= right(%d)\n", left, right);
         midnum = chars [midel].hitnumch;
-        if (!standsright (chars, left, midel))
+     //   printf ("mid(%d) == %d\n", midel, midnum);
+        if (!standsright (chars, left, midel)/* && right != left*/)
             {
-            while (standsright (chars, right, midel))
+     //       printf ("\nleft(%d) == %d stays wrong\nrights ", left, chars[left].hitnumch);
+            while (standsright (chars, right, midel)/* || (right == left && right != midel)*/)
                 {
-                printf ("right stands right\n", left, right);
+     //           printf ("(%d) == %d ", right, chars[right].hitnumch);
                 right--;
                 }
-            change (chars, left, right);
-            if (midel == right)
+            if (left > midel && right > midel)
                 {
-                midel = left;
+     //           printf ("left and right both < mid => changing left and mid + 1 el\n");
+                change (chars, midel, midel + 1);
+                midel++;
+                change (chars, left, midel - 1);
+                }
+            else
+                {
+     //           printf ("stay right\n");
+     //           printf ("and right(%d) == %d stays wrong\n", right, chars[right].hitnumch);
+                change (chars, left, right);
+     //           printf ("changing left(%d) == %d and it\n", left, chars[left].hitnumch);
+                if (midel == right)
+                    {
+                    midel = left;
+     //               printf ("midel is now %d == %d\n", midel, chars[midel].hitnumch);
+                    }
+                else
+                    {
+                    if (midel == left)
+                        {
+                        midel = right;
+     //                   printf ("midel is now %d == %d\n", midel, chars[midel].hitnumch);
+                        }
+                    }
                 }
             }
         left++;
         }
-    SortBallsCharacteristics (chars, left, midel);
-    SortBallsCharacteristics (chars, midel + 1, right);
+    //printchars (chars, hleft, hright);
+    //printf ("end---------------------------------------------------------\n");
+    //getch();
+
+    if (midel == hright) SortBallsCharacteristics (chars, hleft, midel - 1);
+    else SortBallsCharacteristics (chars, hleft, midel);
+
+    SortBallsCharacteristics (chars, midel + 1, hright);
+    return 0;
+    }
+
+void printchars (BallChar chars[], int left, int right)
+    {
+    for (int i = left; i <= right; i++)
+        {
+        printf ("%d ", chars[i].hitnumch);
+        }
+    printf ("\n");
     }
 
 

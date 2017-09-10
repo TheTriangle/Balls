@@ -7,7 +7,7 @@ bool TestSortedChars (BallChar arr[], int finish, int start);
 int findpair (int arr[], int start, int finish, int forel, int cent);
 
 void TestCharWtf (BallChar getarr[],
-                void (*ff)(BallChar arr[], int start, int finish),
+                int (*ff)(BallChar arr[], int start, int finish),
                 bool (*tf)(BallChar arr[], int finish, int start),
                 char tn[], int sizearr);
 
@@ -49,18 +49,22 @@ int main()
     */
     int *sortinganswers = new int [msizearr];
     tx_auto_func (delete [] sortinganswers);
-
     const int testingsize = 10;
     BallChar testingdata[testingsize];
-    for (int f = 0; f < 10; f++)
+
+    for (int i = 0; i < 10; i++)
         {
+        printf ("EEEEEEEEE%d\n", 1);
         for (int j = 0; j < testingsize; j++)
                 {
                 testingdata[j].hitnumch = rand()%10;
                 }
         //printdata (testingdata, 0, testingsize);
         TestCharWtf (testingdata, *SortBallsCharacteristics, *TestSortedChars, "quick", testingsize);
+        printf ("DDDDDDD\n");
         }
+    printf ("i've finished cycle\n");
+
     /*for (int i = 0; i < 99; i++)
         {
         //printf ("A%d", i);
@@ -116,7 +120,7 @@ void TestWtf (int getarr[], POINT (*ff)(int arr[], int start, int finish, int* a
     //int *harr = new int [msizearr];
     ff(getarr, 0, sizearr, &as, &co);
 
-    if (!tf(getarr, 0, sizearr))
+    if (!tf(getarr, sizearr, 0))
         {
         $E;
         printf ("\nERROR %s", tn);
@@ -126,16 +130,20 @@ void TestWtf (int getarr[], POINT (*ff)(int arr[], int start, int finish, int* a
 
 
 
-void TestCharWtf (BallChar getarr[], void (*ff)(BallChar arr[], int start, int finish), bool (*tf)(BallChar arr[], int finish, int start), char tn[], int sizearr)
+void TestCharWtf (BallChar getarr[], int (*ff)(BallChar arr[], int start, int finish), bool (*tf)(BallChar arr[], int finish, int start), char tn[], int sizearr)
     {
     //int sizearr = sizeof (getarr)/sizeof (getarr[0]);
+    printf ("AAAAAAAAAAAAAAAA\n");
     int as = 0;
     int co = 0;
     //int *harr = new int [msizearr];
     ff(getarr, 0, sizearr);
 
-    if (!tf(getarr, 0, sizearr))
+    bool help = tf(getarr, sizearr, 0);
+    printf ("CCCCCCCCCCCCC\n");
+    if (!help)
         {
+        printf ("BBBBBBBBBBBBBBBB\n");
         $E;
         printf ("\nERROR %s", tn);
         //printdata (getarr, 0, sizearr);

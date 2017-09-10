@@ -1,5 +1,6 @@
 #include "TXLib.h"
 #include "Ball.h"
+void initChars (BallChar chars[], Ball balls[], int size);
 void drawHitTable (Ball balls[], const int bnum, double x1, double y1, double x2, double y2, int topsnum = 5);
 void moveBalls (Ball balls[], int bnum);
 void drawBalls (Ball balls[], int bnum);
@@ -12,12 +13,29 @@ int main()
     const int bnum = 6;
     Ball balls[bnum];
     initBalls (balls, bnum);
+    bool paused = false;
+    balls[0].setName ("John");
+    balls[1].setName ("Bill");
+    balls[2].setName ("Alex");
+    balls[3].setName ("Ilya");
+    balls[4].setName ("Ded");
+    balls[5].setName ("Egor");
     while (!GetAsyncKeyState (VK_ESCAPE))
         {
-        moveBalls (balls, bnum);
+        if (GetAsyncKeyState ('P'))
+            {
+            if (paused == false) paused = true;
+            else paused = false;
+            }
+        if (!paused) moveBalls (balls, bnum);
         drawBalls (balls, bnum);
         testBalls (balls, bnum);
-        drawHitTable (balls, bnum, txGetExtentX() - 250, 50, txGetExtentX() - 200, txGetExtentY()/2 - 50);
+        //getch();
+        //printf ("Point a\n");
+        //getch();
+        drawHitTable (balls, bnum, txGetExtentX() - 250, 50, txGetExtentX() - 50, txGetExtentY()/2 - 50);
+        //printf ("Point d\n");
+        //getch();
         //printf ("angle == %f\n", ABall.getAngle());
         txSleep(10);
         txSetFillColor (TX_BLACK);
@@ -31,18 +49,34 @@ int main()
 
 void drawHitTable (Ball balls[], const int bnum, double x1, double y1, double x2, double y2, int topsnum)
     {
-    txSelectFont ("Times New Roman", 30);
     txSetColor (TX_WHITE, 1);
-    double ysize = (y2 - y1) / topsnum;
-    BallChar ballschars [] = {};
-    for (int i = 0; i < bnum; i++)
-        {
-        balls[i].makeChar(&ballschars[bnum]);
-        }
-    SortBallsCharacteristics (ballschars, 0, bnum);
+    double xsize = x2 - x1;
+    double ysize = y2 - y1;
+    double liney = ysize/bnum;
     txLine (x1 + 20, y1, x1 + 20, y2);
-    txDrawText (x1, y1, x1 + 20, y1 + ysize, "№");
-    //for (int i = 0; i < topsnum; i++)
+    txDrawText (x1 + 20, y1, x2, y1 + liney, "Лидеры по отскокам");
+    BallChar chars[bnum];
+    initChars (chars, balls, bnum);
+    SortBallsCharacteristics (chars, 0, bnum - 1);
+    if (bnum < topsnum) topsnum = bnum;
+    char help[16] = {};
+    for (int i = 0; i < topsnum; i++)
+        {
+        txLine (x1, y1 + liney * (i + 1), x2, y1 + liney * (i + 1));
+        sprintf (help, "%d", i + 1);
+        txDrawText (x1, y1 + liney * (i + 1), x1 + 20, y1 + liney * (i + 2), help);
+        txDrawText (x1 + 20, y1 + liney * (i + 1), x2, y1 + liney * (i + 2), chars[i].namech);
+        }
+    txLine (x1, y2, x2, y2);
+    }
+
+
+void initChars (BallChar chars[], Ball balls[], int size)
+    {
+    for (int i = 0; i < size; i++)
+        {
+        chars[i] = balls[i].thisChars;
+        }
     }
 
 
