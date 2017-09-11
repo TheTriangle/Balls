@@ -11,7 +11,7 @@ int main()
     {
     txCreateWindow (800, 600);
     txDisableAutoPause();
-    const int bnum = 6;
+    const int bnum = 10;
     Ball balls[bnum];
     initBalls (balls, bnum);
     bool paused = false;
@@ -65,7 +65,7 @@ void drawHitTable (Ball balls[], const int bnum, double x1, double y1, double x2
     txSetColor (TX_WHITE, 1);
     double xsize = x2 - x1;
     double ysize = y2 - y1;
-    double liney = ysize/bnum;
+    double liney = ysize/(topsnum + 1);
     txLine (x1 + 20, y1, x1 + 20, y2);
     txDrawText (x1 + 20, y1, x2, y1 + liney, "Лидеры по отскокам");
     BallChar chars[bnum];

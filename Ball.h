@@ -156,6 +156,7 @@ class Ball
         {
         cords.x += speed * cos(angle * DEGREEMODIFIER) * dt;
         cords.y -= speed * sin(angle * DEGREEMODIFIER) * dt;
+        if (dt != 1) dt = 1;
         }
     int GetHitCounter()
         {
@@ -223,8 +224,8 @@ class Ball
                                        cords.x + cos (angle) * i/biggerratio,
                                        cords.y - cos (angle) * i/biggerratio))
                 {
-                printf ("OUCH\n");
-                dt = 1 - i/biggerratio;
+                printf ("OUCH(%s)\n", name);
+                dt = 2;//1 - i/biggerratio;
                 this->addCollision();
                 angle = (getAngleTo(wball.getX(), wball.getY()) + 180) + angle;
                 if (angle > 0) angle = (int)(angle)%360;
