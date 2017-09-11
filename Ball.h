@@ -186,41 +186,49 @@ int SortBallsCharacteristics (BallChar chars[], int left, int right)
 
     while (left <= right)
         {
-     //   printf ("\nleft(%d) <= right(%d)\n", left, right);
+    //   printf ("\nleft(%d) <= right(%d)\n", left, right);
         midnum = chars [midel].hitnumch;
-     //   printf ("mid(%d) == %d\n", midel, midnum);
+    //    printf ("mid(%d) == %d\n", midel, midnum);
         if (!standsright (chars, left, midel)/* && right != left*/)
             {
-     //       printf ("\nleft(%d) == %d stays wrong\nrights ", left, chars[left].hitnumch);
-            while (standsright (chars, right, midel)/* || (right == left && right != midel)*/)
-                {
-     //           printf ("(%d) == %d ", right, chars[right].hitnumch);
-                right--;
-                }
+    //        printf ("\nleft(%d) == %d stays wrong\nrights ", left, chars[left].hitnumch);
             if (left > midel && right > midel)
                 {
-     //           printf ("left and right both < mid => changing left and mid + 1 el\n");
-                change (chars, midel, midel + 1);
-                midel++;
-                change (chars, left, midel - 1);
+    //            printf ("left and right both > mid => changing left and mid - 1 el\n");
+                if (left == midel + 1)
+                    {
+                    change (chars, left, midel);
+                    midel++;
+                    }
+                else
+                    {
+                    change (chars, midel, midel + 1);
+                    midel++;
+                    change (chars, left, midel - 1);
+                    }
                 }
             else
                 {
-     //           printf ("stay right\n");
-     //           printf ("and right(%d) == %d stays wrong\n", right, chars[right].hitnumch);
+                while (standsright (chars, right, midel)/* || (right == left && right != midel)*/)
+                    {
+    //                printf ("(%d) == %d ", right, chars[right].hitnumch);
+                    right--;
+                    }
+    //            printf ("stay right\n");
+    //            printf ("and right(%d) == %d stays wrong\n", right, chars[right].hitnumch);
                 change (chars, left, right);
-     //           printf ("changing left(%d) == %d and it\n", left, chars[left].hitnumch);
+    //            printf ("changing left(%d) == %d and it\n", left, chars[left].hitnumch);
                 if (midel == right)
                     {
                     midel = left;
-     //               printf ("midel is now %d == %d\n", midel, chars[midel].hitnumch);
+    //                printf ("midel is now %d == %d\n", midel, chars[midel].hitnumch);
                     }
                 else
                     {
                     if (midel == left)
                         {
                         midel = right;
-     //                   printf ("midel is now %d == %d\n", midel, chars[midel].hitnumch);
+    //                    printf ("midel is now %d == %d\n", midel, chars[midel].hitnumch);
                         }
                     }
                 }
