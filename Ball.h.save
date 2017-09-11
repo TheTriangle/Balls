@@ -11,11 +11,13 @@ void printchars (BallChar chars[], int left, int right);
 int SortBallsCharacteristics (BallChar chars[], int left, int right);
 bool standsright (BallChar chars[], int tests, int mid);
 void change (BallChar chars[], int first, int second);
+void Ball::setVectorColor (COLORREF gcol, int width = 5);
 class Ball
     {
     private:
     COLORREF ballcolor;
     POINT cords;
+    int vectorwidth = 5;
     double radius;
     double angle;
     char name[16];
@@ -63,10 +65,36 @@ class Ball
         }
     void setName (char newname[])
         {
-        *name = *newname;
-        *(thisChars.namech) = *newname;
+        for (int i = 0; i < 16; i++)
+            {
+            name[i] = newname[i];
+            thisChars.namech[i] = newname[i];
+            }
         }
-
+    void setRadius (double grad)
+        {
+        radius = grad;
+        }
+    void setColor (COLORREF gcol)
+        {
+        ballcolor = gcol;
+        }
+    void setVectorColor (COLORREF gcol, int width)
+        {
+        
+        
+    double getX()
+        {
+        return cords.x;
+        }
+    double getY()
+        {
+        return cords.y;
+        }
+    POINT getCords()
+        {
+        return cords;
+        }
     void draw ()
         {
         txSelectFont ("Times New Roman", 18);
@@ -121,7 +149,16 @@ class Ball
         {
         return angle;
         }
-
+    double getDistanceTo (Ball target)
+        {
+        return sqrt((target.getX() - cords.x) * (target.getX() - cords.x) +
+                    (target.getY() - cords.y) * (target.getY() - cords.y));
+        }
+    //void testCollisions (Ball balls[], int bnum)
+    //    {
+    //    for (int i = 0; i < bnum; i++)
+    //        {
+    //        if
     };
 
 

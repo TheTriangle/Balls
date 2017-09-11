@@ -15,7 +15,9 @@ class Ball
     {
     private:
     COLORREF ballcolor;
+    COLORREF vectorcolor = RGB (200, 200, 200);
     POINT cords;
+    int vectorwidth = 5;
     double radius;
     double angle;
     char name[16];
@@ -63,18 +65,46 @@ class Ball
         }
     void setName (char newname[])
         {
-        *name = *newname;
-        *(thisChars.namech) = *newname;
+        for (int i = 0; i < 16; i++)
+            {
+            name[i] = newname[i];
+            thisChars.namech[i] = newname[i];
+            }
+        }
+    void setRadius (double grad)
+        {
+        radius = grad;
+        }
+    void setColor (COLORREF gcol)
+        {
+        ballcolor = gcol;
+        }
+    void setVectorColor (COLORREF gcol, int gwidth = 5)
+        {
+        vectorcolor = gcol;
+        vectorwidth = gwidth;
         }
 
+    double getX()
+        {
+        return cords.x;
+        }
+    double getY()
+        {
+        return cords.y;
+        }
+    POINT getCords()
+        {
+        return cords;
+        }
     void draw ()
         {
         txSelectFont ("Times New Roman", 18);
         txSetFillColor (ballcolor);
-        txSetColor (TX_WHITE, 1);
+        txSetColor (ballcolor, 1);
         txCircle (cords.x, cords.y, radius);
+        txSetColor (vectorcolor, vectorwidth);
         txDrawText (cords.x - radius - 65, cords.y - radius - 25, cords.x + radius + 65, cords.y - radius - 15, name);
-        txSetColor (RGB (200, 200, 200), 5);
         txLine (cords.x, cords.y,  cords.x + speed * cos(angle * DEGREEMODIFIER) * 10, cords.y - speed * sin(angle * DEGREEMODIFIER) * 5);
         }
     Ball (double xc, double yc, double rad, double ang, double spd, COLORREF fcolor, char gname[])
@@ -121,7 +151,16 @@ class Ball
         {
         return angle;
         }
-
+    double getDistanceTo (Ball target)
+        {
+        return sqrt((target.getX() - cords.x) * (target.getX() - cords.x) +
+                    (target.getY() - cords.y) * (target.getY() - cords.y));
+        }
+    //void testCollisions (Ball balls[], int bnum)
+    //    {
+    //    for (int i = 0; i < bnum; i++)
+    //        {
+    //        if
     };
 
 

@@ -20,20 +20,22 @@ int main()
     balls[3].setName ("Ilya");
     balls[4].setName ("Ded");
     balls[5].setName ("Egor");
+
     while (!GetAsyncKeyState (VK_ESCAPE))
         {
+        drawBalls (balls, bnum);
+        testBalls (balls, bnum);
+        drawHitTable (balls, bnum, txGetExtentX() - 250, 50, txGetExtentX() - 50, txGetExtentY()/2 - 50);
         if (GetAsyncKeyState ('P'))
             {
+            txSleep (70);
             if (paused == false) paused = true;
             else paused = false;
             }
         if (!paused) moveBalls (balls, bnum);
-        drawBalls (balls, bnum);
-        testBalls (balls, bnum);
         //getch();
         //printf ("Point a\n");
         //getch();
-        drawHitTable (balls, bnum, txGetExtentX() - 250, 50, txGetExtentX() - 50, txGetExtentY()/2 - 50);
         //printf ("Point d\n");
         //getch();
         //printf ("angle == %f\n", ABall.getAngle());
@@ -86,7 +88,7 @@ void initBalls (Ball balls[], int bnum)
     for (int i = 0; i < bnum; i++)
         {
         Ball hball ((double)(i)/(double)(bnum) * txGetExtentX(), (double)(i)/(double)(bnum) * txGetExtentY(),
-                    10, (i - bnum/2) * 15, 5, RGB ((double)(i)/(double)(bnum)*255, (double)(i)/(double)(bnum)*255, (double)(i)/(double)(bnum)*255), i);
+                    10, (i - bnum/2) * 15, 5, RGB ((double)(i)/(double)(bnum)*200 + 55, (double)(i)/(double)(bnum)*200 + 55, (double)(i)/(double)(bnum)*200 + 55), i);
         balls[i] = hball;
         }
     }
