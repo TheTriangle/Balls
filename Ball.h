@@ -7,6 +7,7 @@ class BallChar
     int hitnumch = 0;
     };
 
+double getDistanceBetween(double x1, double y1, double x2, double y2);
 void printchars (BallChar chars[], int left, int right);
 int SortBallsCharacteristics (BallChar chars[], int left, int right);
 bool standsright (BallChar chars[], int tests, int mid);
@@ -20,7 +21,9 @@ class Ball
     int vectorwidth = 5;
     double radius;
     double angle;
+    int id;
     char name[16];
+    double dt = 1;
     double speed;
     int hitcounter;
     public:
@@ -85,6 +88,15 @@ class Ball
         vectorwidth = gwidth;
         }
 
+    int getID()
+        {
+        return id;
+        }
+    double getAngleTo(double xto, double yto)
+        {
+        return asin((yto - cords.y)/getDistanceTo(xto, yto))/DEGREEMODIFIER;
+        }
+
     double getX()
         {
         return cords.x;
@@ -107,7 +119,7 @@ class Ball
         txDrawText (cords.x - radius - 65, cords.y - radius - 25, cords.x + radius + 65, cords.y - radius - 15, name);
         txLine (cords.x, cords.y,  cords.x + speed * cos(angle * DEGREEMODIFIER) * 10, cords.y - speed * sin(angle * DEGREEMODIFIER) * 5);
         }
-    Ball (double xc, double yc, double rad, double ang, double spd, COLORREF fcolor, char gname[])
+    Ball (double xc, double yc, double rad, double ang, double spd, COLORREF fcolor, char gname[], int id)
         {
         cords.x = xc;
         cords.y = yc;
@@ -119,7 +131,7 @@ class Ball
         hitcounter = 0;
         *(thisChars.namech) = *gname;
         }
-    Ball (double xc, double yc, double rad, double ang, double spd, COLORREF fcolor, int number)
+    Ball (double xc, double yc, double rad, double ang, double spd, COLORREF fcolor, int number, int id)
         {
         cords.x = xc;
         cords.y = yc;
@@ -138,7 +150,7 @@ class Ball
         *(gchar->namech) = *name;
         gchar->hitnumch = hitcounter;
         }
-    void move(double dt)
+    void move()
         {
         cords.x += speed * cos(angle * DEGREEMODIFIER) * dt;
         cords.y -= speed * sin(angle * DEGREEMODIFIER) * dt;
@@ -151,17 +163,86 @@ class Ball
         {
         return angle;
         }
-    double getDistanceTo (Ball target)
+    double getDistanceTo (double xto, double yto)
         {
-        return sqrt((target.getX() - cords.x) * (target.getX() - cords.x) +
-                    (target.getY() - cords.y) * (target.getY() - cords.y));
+        return sqrt((xto - cords.x) * (xto - cords.x) +
+                    (yto - cords.y) * (yto - cords.y));
         }
     //void testCollisions (Ball balls[], int bnum)
     //    {
     //    for (int i = 0; i < bnum; i++)
     //        {
     //        if
+
+    void makeCollisions (Ball others[], int bnum)
+        {
+        for (int i = 0; i < bnum; i++)
+            {
+            if (others[i].getID() != id &&
+                        others[i].getDistanceTo (cords.x, cords.y) <=
+                        others[i].getSpeed() + speed + others[i].getRadius() + radius)
+                {
+                makeCollisionWith (others[i]);
+                }
+            }
+        }
+    double getRadius()
+        {
+        return radius;
+        }
+    double getSpeed()
+        {
+        return speed;
+        }
+    void addCollision (int addnum = 1)
+        {
+        hitcounter += addnum;
+        thisChars.hitnumch += addnum;
+        }
+    void makeCollisionWith (Ball wball)
+        {
+        double biggerratio;
+        double biggerspeed;
+        double biggerradius;
+        if (wball.getSpeed()/wball.getRadius() > speed/radius)
+            {
+            biggerratio = wball.getSpeed()/wball.getRadius() * 2;
+            biggerspeed = wball.getSpeed();
+            biggerradius = wball.getRadius();
+            }
+        else          //TODO
+            {         //
+            biggerratio = speed/radius * 2;
+            biggerspeed = speed;
+            biggerradius = radius;
+            }
+
+        for (int i = 0; i < biggerratio; i++)
+            {
+            if (testCollPoints (wball, wball.getX() + cos (wball.getAngle()) * i/biggerratio,
+                                       wball.getY() - cos (wball.getAngle()) * i/biggerratio,
+                                       cords.x + cos (angle) * i/biggerratio,
+                                       cords.y - cos (angle) * i/biggerratio))
+                {
+                dt = 1 - i/biggerratio;
+                this->addCollision();
+                angle = (getAngleTo(wball.getX(), wball.getY()) + 180) + angle;
+                if (angle > 0) angle = (int)(angle)%360;
+                else angle = -((int)(fabs(angle))%360);
+                }
+            }
+        }
+    bool testCollPoints (Ball tball, double tgx, double tgy, double thx, double thy)
+        {
+        if (getDistanceBetween (tgx, tgy, thx, thy) <= tball.getRadius() + radius) return true;
+        return false;
+        }
     };
+
+double getDistanceBetween(double x1, double y1, double x2, double y2)
+    {
+    return sqrt((x1-x2)*(x1-x2) + (y1-y2)*(y1-y2));
+    }
 
 
 int SortBallsCharacteristics (BallChar chars[], int left, int right)

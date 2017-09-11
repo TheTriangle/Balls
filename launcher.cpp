@@ -23,6 +23,7 @@ int main()
 
     while (!GetAsyncKeyState (VK_ESCAPE))
         {
+        makeCollisions (balls, bnum);
         drawBalls (balls, bnum);
         testBalls (balls, bnum);
         drawHitTable (balls, bnum, txGetExtentX() - 250, 50, txGetExtentX() - 50, txGetExtentY()/2 - 50);
@@ -88,7 +89,8 @@ void initBalls (Ball balls[], int bnum)
     for (int i = 0; i < bnum; i++)
         {
         Ball hball ((double)(i)/(double)(bnum) * txGetExtentX(), (double)(i)/(double)(bnum) * txGetExtentY(),
-                    10, (i - bnum/2) * 15, 5, RGB ((double)(i)/(double)(bnum)*200 + 55, (double)(i)/(double)(bnum)*200 + 55, (double)(i)/(double)(bnum)*200 + 55), i);
+                    40, (i - bnum/2) * 15, 5, RGB ((double)(i)/(double)(bnum)*200 + 55, (double)(i)/(double)(bnum)*200 + 55, (double)(i)/(double)(bnum)*200 + 55), i, i);
+
         balls[i] = hball;
         }
     }
@@ -113,7 +115,7 @@ void moveBalls (Ball balls[], int bnum)
     {
     for (int i = 0; i < bnum; i++)
         {
-        balls[i].move(1);
+        balls[i].move();
         }
     }
 
