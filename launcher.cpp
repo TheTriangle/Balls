@@ -1,5 +1,6 @@
 #include "TXLib.h"
 #include "Ball.h"
+void makeCollisionsInLauncher (Ball balls[], int bnum);
 void initChars (BallChar chars[], Ball balls[], int size);
 void drawHitTable (Ball balls[], const int bnum, double x1, double y1, double x2, double y2, int topsnum = 5);
 void moveBalls (Ball balls[], int bnum);
@@ -23,7 +24,7 @@ int main()
 
     while (!GetAsyncKeyState (VK_ESCAPE))
         {
-        makeCollisions (balls, bnum);
+        makeCollisionsInLauncher (balls, bnum);
         drawBalls (balls, bnum);
         testBalls (balls, bnum);
         drawHitTable (balls, bnum, txGetExtentX() - 250, 50, txGetExtentX() - 50, txGetExtentY()/2 - 50);
@@ -50,6 +51,15 @@ int main()
     return 0;
     }
 
+
+void makeCollisionsInLauncher (Ball balls[], int bnum)
+    {
+    for (int i = 0; i < bnum; i++)
+        {
+        balls [i].makeCollisions (balls, bnum);
+        }
+    }
+
 void drawHitTable (Ball balls[], const int bnum, double x1, double y1, double x2, double y2, int topsnum)
     {
     txSetColor (TX_WHITE, 1);
@@ -68,7 +78,7 @@ void drawHitTable (Ball balls[], const int bnum, double x1, double y1, double x2
         txLine (x1, y1 + liney * (i + 1), x2, y1 + liney * (i + 1));
         sprintf (help, "%d", i + 1);
         txDrawText (x1, y1 + liney * (i + 1), x1 + 20, y1 + liney * (i + 2), help);
-        txDrawText (x1 + 20, y1 + liney * (i + 1), x2, y1 + liney * (i + 2), chars[i].namech);
+        txDrawText (x1 + 20, y1 + liney * (i + 1), x2, y1 + liney * (i + 2), chars[bnum - i - 1].namech);
         }
     txLine (x1, y2, x2, y2);
     }
@@ -89,7 +99,7 @@ void initBalls (Ball balls[], int bnum)
     for (int i = 0; i < bnum; i++)
         {
         Ball hball ((double)(i)/(double)(bnum) * txGetExtentX(), (double)(i)/(double)(bnum) * txGetExtentY(),
-                    40, (i - bnum/2) * 15, 5, RGB ((double)(i)/(double)(bnum)*200 + 55, (double)(i)/(double)(bnum)*200 + 55, (double)(i)/(double)(bnum)*200 + 55), i, i);
+                    20, (i - bnum/2) * 15, 5, RGB ((double)(i)/(double)(bnum)*200 + 55, (double)(i)/(double)(bnum)*200 + 55, (double)(i)/(double)(bnum)*200 + 55), i, i);
 
         balls[i] = hball;
         }

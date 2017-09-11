@@ -119,7 +119,7 @@ class Ball
         txDrawText (cords.x - radius - 65, cords.y - radius - 25, cords.x + radius + 65, cords.y - radius - 15, name);
         txLine (cords.x, cords.y,  cords.x + speed * cos(angle * DEGREEMODIFIER) * 10, cords.y - speed * sin(angle * DEGREEMODIFIER) * 5);
         }
-    Ball (double xc, double yc, double rad, double ang, double spd, COLORREF fcolor, char gname[], int id)
+    Ball (double xc, double yc, double rad, double ang, double spd, COLORREF fcolor, char gname[], int gid)
         {
         cords.x = xc;
         cords.y = yc;
@@ -130,8 +130,9 @@ class Ball
         *name = *gname;
         hitcounter = 0;
         *(thisChars.namech) = *gname;
+        id = gid;
         }
-    Ball (double xc, double yc, double rad, double ang, double spd, COLORREF fcolor, int number, int id)
+    Ball (double xc, double yc, double rad, double ang, double spd, COLORREF fcolor, int number, int gid)
         {
         cords.x = xc;
         cords.y = yc;
@@ -142,6 +143,7 @@ class Ball
         sprintf (name, "%d", number);
         hitcounter = 0;
         sprintf (thisChars.namech, "%d", number);
+        id = gid;
         }
     Ball ()
         {}
@@ -168,20 +170,17 @@ class Ball
         return sqrt((xto - cords.x) * (xto - cords.x) +
                     (yto - cords.y) * (yto - cords.y));
         }
-    //void testCollisions (Ball balls[], int bnum)
-    //    {
-    //    for (int i = 0; i < bnum; i++)
-    //        {
-    //        if
 
     void makeCollisions (Ball others[], int bnum)
         {
         for (int i = 0; i < bnum; i++)
             {
+            //printf ("id %d\n", others[i].getID());
             if (others[i].getID() != id &&
                         others[i].getDistanceTo (cords.x, cords.y) <=
                         others[i].getSpeed() + speed + others[i].getRadius() + radius)
                 {
+                //printf ("OOUCH\n");
                 makeCollisionWith (others[i]);
                 }
             }
@@ -224,6 +223,7 @@ class Ball
                                        cords.x + cos (angle) * i/biggerratio,
                                        cords.y - cos (angle) * i/biggerratio))
                 {
+                printf ("OUCH\n");
                 dt = 1 - i/biggerratio;
                 this->addCollision();
                 angle = (getAngleTo(wball.getX(), wball.getY()) + 180) + angle;
