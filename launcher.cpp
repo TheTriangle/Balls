@@ -86,7 +86,7 @@ void initBalls (Ball balls[], int bnum)
     for (int i = 0; i < bnum; i++)
         {
         Ball hball ((double)(i)/(double)(bnum) * txGetExtentX(), (double)(i)/(double)(bnum) * txGetExtentY(),
-                    10, (i - bnum/2) * 15, 5, RGB ((double)(i)/(double)(bnum)*255, (double)(i)/(double)(bnum)*255, (double)(i)/(double)(bnum)*255), i);
+                    10, (i - bnum/2) * 15, 5, RGB ((double)(i)/(double)(bnum)*255, (double)(i)/(double)(bnum)*255, (double)(i)/(double)(bnum)*255), i, i);
         balls[i] = hball;
         }
     }

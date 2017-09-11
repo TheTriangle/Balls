@@ -13,8 +13,11 @@ bool standsright (BallChar chars[], int tests, int mid);
 void change (BallChar chars[], int first, int second);
 class Ball
     {
+    
     private:
     COLORREF ballcolor;
+    int id;
+    int dt;
     POINT cords;
     double radius;
     double angle;
@@ -77,7 +80,7 @@ class Ball
         txSetColor (RGB (200, 200, 200), 5);
         txLine (cords.x, cords.y,  cords.x + speed * cos(angle * DEGREEMODIFIER) * 10, cords.y - speed * sin(angle * DEGREEMODIFIER) * 5);
         }
-    Ball (double xc, double yc, double rad, double ang, double spd, COLORREF fcolor, char gname[])
+    Ball (double xc, double yc, double rad, double ang, double spd, COLORREF fcolor, char gname[], int id)
         {
         cords.x = xc;
         cords.y = yc;
@@ -89,7 +92,7 @@ class Ball
         hitcounter = 0;
         *(thisChars.namech) = *gname;
         }
-    Ball (double xc, double yc, double rad, double ang, double spd, COLORREF fcolor, int number)
+    Ball (double xc, double yc, double rad, double ang, double spd, COLORREF fcolor, int number, int id)
         {
         cords.x = xc;
         cords.y = yc;
@@ -101,6 +104,15 @@ class Ball
         hitcounter = 0;
         sprintf (thisChars.namech, "%d", number);
         }
+    int getID()
+        {
+        return id;
+        }
+    double getAngleTo(double xto, double yto)
+        {
+        return asin(yto - cords.y)/getDistanceTo(xto, yto);
+        }
+    
     Ball ()
         {}
     void makeChar (BallChar *gchar)
@@ -108,10 +120,11 @@ class Ball
         *(gchar->namech) = *name;
         gchar->hitnumch = hitcounter;
         }
-    void move(double dt)
+    void move()
         {
         cords.x += speed * cos(angle * DEGREEMODIFIER) * dt;
         cords.y -= speed * sin(angle * DEGREEMODIFIER) * dt;
+        if (dt != 1) dt = 1;
         }
     int GetHitCounter()
         {
@@ -121,7 +134,52 @@ class Ball
         {
         return angle;
         }
-
+    void makeCollisions (Ball others[], int bnum)
+        {
+        for (int i = 0; i < bnum; i++)
+            {
+            if (others.getID != id &&
+                        others[i].getDistanceTo (cords.x, cords.y) <=
+                        others[i].getSpeed + speed + others[i].getRadius() + radius)
+                {
+                makeCollisionWith (others[i])
+                }
+            }
+        }
+    void addCollision (int addnum = 1)
+        {
+        hitcounter += addnum;
+        thisChars.hitnumch += addnum;
+        }
+    bool testCollisionWith (Ball wball)
+        {
+        double biggerratio;
+        double biggerspeed;
+        double biggerradius;
+        if (wball.getSpeed()/wball.getRadius() > speed/radius) 
+            {
+            biggerratio = wball.getSpeed()/wball.getRadius() * 2;
+            biggerspeed = wball.getSpeed();
+            biggerradius = wball.getRadius();
+            }
+        else          //TODO переделать определение столкновения на проверку пересе
+            {         //чения векторов, параллельных вектору скорости на разных частях окр-ти
+            biggerratio = speed/radius * 2;
+            biggerspeed = speed;
+            biggerradius = radius;
+            }
+        
+        for (int i = 0; i < biggerratio; i++)
+            {
+            if (testCollPoints (wball, this, wball.getX() += cos (wball.getAngle()) * i/biggerratio, 
+                                             wball.getY() -= cos (wball.getAngle()) * i/biggerratio,
+                                             cords.x += cos (angle) * i/biggerratio,
+                                             cords.y -= cos (angle) * i/biggerratio))
+                {
+                dt = 1 - i/biggerratio;
+                this.addColision();
+                angle = (getAngleTo(wball.getX(), wball.getY()) + 180)
+                }
     };
 
 

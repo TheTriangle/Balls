@@ -13,9 +13,21 @@ int main()
     const int bnum = 6;
     Ball balls[bnum];
     initBalls (balls, bnum);
+    bool paused = false;
+    balls[0].setName ("John");
+    balls[1].setName ("Bill");
+    balls[2].setName ("Alex");
+    balls[3].setName ("Ilya");
+    balls[4].setName ("Ded");
+    balls[5].setName ("Egor");
     while (!GetAsyncKeyState (VK_ESCAPE))
         {
-        moveBalls (balls, bnum);
+        if (GetAsyncKeyState ('P'))
+            {
+            if (paused == false) paused = true;
+            else paused = false;
+            }
+        if (!paused) moveBalls (balls, bnum);
         drawBalls (balls, bnum);
         testBalls (balls, bnum);
         //getch();
@@ -51,8 +63,8 @@ void drawHitTable (Ball balls[], const int bnum, double x1, double y1, double x2
     for (int i = 0; i < topsnum; i++)
         {
         txLine (x1, y1 + liney * (i + 1), x2, y1 + liney * (i + 1));
-        sprintf ("
-        txDrawText (x1, y1 + liney * (i + 1), x1 + 20, y1 + liney * (i + 2), );
+        sprintf (help, "%d", i + 1);
+        txDrawText (x1, y1 + liney * (i + 1), x1 + 20, y1 + liney * (i + 2), help);
         txDrawText (x1 + 20, y1 + liney * (i + 1), x2, y1 + liney * (i + 2), chars[i].namech);
         }
     txLine (x1, y2, x2, y2);
@@ -74,7 +86,7 @@ void initBalls (Ball balls[], int bnum)
     for (int i = 0; i < bnum; i++)
         {
         Ball hball ((double)(i)/(double)(bnum) * txGetExtentX(), (double)(i)/(double)(bnum) * txGetExtentY(),
-                    10, (i - bnum/2) * 15, 5, RGB ((double)(i)/(double)(bnum)*255, (double)(i)/(double)(bnum)*255, (double)(i)/(double)(bnum)*255), i);
+                    10, (i - bnum/2) * 15, 5, RGB ((double)(i)/(double)(bnum)*255, (double)(i)/(double)(bnum)*255, (double)(i)/(double)(bnum)*255), i, i);
         balls[i] = hball;
         }
     }
