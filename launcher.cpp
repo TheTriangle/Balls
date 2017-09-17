@@ -10,7 +10,7 @@ void initBalls (Ball balls[], int bnum);
 int main()
     {
     txCreateWindow (800, 600);
-    txDisableAutoPause();
+    //txDisableAutoPause();
     const int bnum = 10;
     Ball balls[bnum];
     initBalls (balls, bnum);
@@ -24,8 +24,8 @@ int main()
 
     while (!GetAsyncKeyState (VK_ESCAPE))
         {
-        makeCollisionsInLauncher (balls, bnum);
         drawBalls (balls, bnum);
+        makeCollisionsInLauncher (balls, bnum);
         testBalls (balls, bnum);
         drawHitTable (balls, bnum, txGetExtentX() - 250, 50, txGetExtentX() - 50, txGetExtentY()/2 - 50);
         if (GetAsyncKeyState ('P'))
@@ -36,9 +36,9 @@ int main()
             }
         if (!paused) moveBalls (balls, bnum);
         //getch();
-        //printf ("Point a\n");
+        //printf ("DoubPaira\n");
         //getch();
-        //printf ("Point d\n");
+        //printf ("DoubPaird\n");
         //getch();
         //printf ("angle == %f\n", ABall.getAngle());
         txSleep(10);
@@ -99,7 +99,7 @@ void initBalls (Ball balls[], int bnum)
     for (int i = 0; i < bnum; i++)
         {
         Ball hball ((double)(i)/(double)(bnum) * txGetExtentX(), (double)(i)/(double)(bnum) * txGetExtentY(),
-                    20, (i - bnum/2) * 15, 5, RGB ((double)(i)/(double)(bnum)*200 + 55, (double)(i)/(double)(bnum)*200 + 55, (double)(i)/(double)(bnum)*200 + 55), i, i);
+                    20 + i, (i - bnum/2) * 15, 5, RGB ((double)(i)/(double)(bnum)*200 + 55, (double)(i)/(double)(bnum)*200 + 55, (double)(i)/(double)(bnum)*200 + 55), i, i);
 
         balls[i] = hball;
         }
