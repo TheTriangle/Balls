@@ -21,6 +21,7 @@ class BallChar
     int hitnumch = 0;
     };
 
+//void initBalls (Ball balls[], int bnum);
 double getAccurateAngle (double x, double y);
 DoubPair ProjVec (double x1, double y1, double x2, double y2);
 double ScalMult (double x1, double y1, double x2, double y2);
@@ -113,7 +114,11 @@ class Ball
         vectorcolor = gcol;
         vectorwidth = gwidth;
         }
-
+    void setCords (double gx, double gy)
+        {
+        cords.x = gx;
+        cords.y = gy;
+        }
     int getID()
         {
         return id;
@@ -183,6 +188,7 @@ class Ball
         {
         cords.x += speed * cos(angle ) * dt;
         cords.y -= speed * sin(angle ) * dt;
+        speed *= 1.001;
         if (dt != 1) dt = 1;
         }
     int GetHitCounter()
@@ -330,18 +336,18 @@ SUPERDoubPair getBiPolSpeedAfterCollision (double vx1, double vy1, double vx2, d
     DoubPair deltac = {cx2 - cx1, cy2 - cy1};
     //DoubPair nv1;
     //DoubPair nv2;
-    //DoubPair v1ProjX = ProjVec (vx1, vy1, cx2 - cx1, cy2 - cy1);
-    //DoubPair v1ProjY = ProjVec (vx1, vy1, cy1 - cy2, cx2 - cx1);
-    //double v1pxl = LengthOf (v1ProjX.x, v1ProjX.y);
-    //double v1pyl = LengthOf (v1ProjY.x, v1ProjY.y);
-    //DoubPair v1NC = {v1pxl, v1pyl};
+    DoubPair v1ProjX = ProjVec (vx1, vy1, cx2 - cx1, cy2 - cy1);
+    DoubPair v1ProjY = ProjVec (vx1, vy1, cy1 - cy2, cx2 - cx1);
+    double v1pxl = LengthOf (v1ProjX.x, v1ProjX.y);
+    double v1pyl = LengthOf (v1ProjY.x, v1ProjY.y);
+    DoubPair v1NC = {v1pxl, v1pyl};
 
 
-    //DoubPair v2ProjX = ProjVec (vx2, vy2, cx2 - cx1, cy2 - cy1);
-    //DoubPair v2ProjY = ProjVec (vx2, vy2, cy1 - cy2, cx2 - cx1);
-    //double v2pxl = LengthOf (v2ProjX.x, v2ProjX.y);
-    //double v2pyl = LengthOf (v2ProjY.x, v2ProjY.y);
-    //DoubPair v2NC = {v2pxl, v2pyl};
+    DoubPair v2ProjX = ProjVec (vx2, vy2, cx2 - cx1, cy2 - cy1);
+    DoubPair v2ProjY = ProjVec (vx2, vy2, cy1 - cy2, cx2 - cx1);
+    double v2pxl = LengthOf (v2ProjX.x, v2ProjX.y);
+    double v2pyl = LengthOf (v2ProjY.x, v2ProjY.y);
+    DoubPair v2NC = {v2pxl, v2pyl};
 
     DoubPair nv1NC;
     DoubPair nv2NC;
@@ -510,6 +516,71 @@ DoubPair ProjVec (double x1, double y1, double x2, double y2)
     return answer;
     }
 
+void initChars (BallChar chars[], Ball balls[], int size)
+    {
+    for (int i = 0; i < size; i++)
+        {
+        chars[i] = balls[i].thisChars;
+        }
+    }
+
+
+
+void drawBalls (Ball balls[], int bnum)
+    {
+    for (int i = 0; i < bnum; i++)
+        {
+        balls[i].draw();
+        }
+    }
+
+void moveBalls (Ball balls[], int bnum)
+    {
+    for (int i = 0; i < bnum; i++)
+        {
+        balls[i].move();
+        }
+    }
+
+void drawHitTable (Ball balls[], const int bnum, double x1, double y1, double x2, double y2, int topsnum)
+    {
+    txSetColor (TX_WHITE, 1);
+    double xsize = x2 - x1;
+    double ysize = y2 - y1;
+    double liney = ysize/(topsnum + 1);
+    txLine (x1 + 20, y1, x1 + 20, y2);
+    txDrawText (x1 + 20, y1, x2, y1 + liney, "Лидеры по отскокам");
+    BallChar chars[bnum];
+    initChars (chars, balls, bnum);
+    SortBallsCharacteristics (chars, 0, bnum - 1);
+    if (bnum < topsnum) topsnum = bnum;
+    char help[16] = {};
+    for (int i = 0; i < topsnum; i++)
+        {
+        txLine (x1, y1 + liney * (i + 1), x2, y1 + liney * (i + 1));
+        sprintf (help, "%d", i + 1);
+        txDrawText (x1, y1 + liney * (i + 1), x1 + 20, y1 + liney * (i + 2), help);
+        txDrawText (x1 + 20, y1 + liney * (i + 1), x2, y1 + liney * (i + 2), chars[bnum - i - 1].namech);
+        }
+    txLine (x1, y2, x2, y2);
+    }
+
+void testBalls (Ball balls[], int bnum)
+    {
+    for (int i = 0; i < bnum; i++)
+        {
+        balls[i].testWallHit();
+        }
+    }
+
+void makeCollisionsInLauncher (Ball balls[], int bnum)
+    {
+    for (int i = 0; i < bnum; i++)
+        {
+        balls [i].makeCollisions (balls, bnum);
+        }
+    }
+
 bool standsright (BallChar chars[], int tests, int mid)
     {
     if (tests < mid)
@@ -523,6 +594,17 @@ bool standsright (BallChar chars[], int tests, int mid)
     return false;
     }
 
+
+void initBalls (Ball balls[], int bnum)
+    {
+    for (int i = 0; i < bnum; i++)
+        {
+        Ball hball ((double)(i)/(double)(bnum) * txGetExtentX(), (double)(i)/(double)(bnum) * txGetExtentY(),
+                    20 + i, (i - bnum/2) * 15, 5, RGB ((double)(i)/(double)(bnum)*200 + 55, (double)(i)/(double)(bnum)*200 + 55, (double)(i)/(double)(bnum)*200 + 55), i, i);
+
+        balls[i] = hball;
+        }
+    }
 
 void change (BallChar chars[], int first, int second)
     {
