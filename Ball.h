@@ -54,7 +54,7 @@ class Ball
     double speed;
     int hitcounter;
     public:
-    BallChar thisChars; //TODO перенести под спец.дост.private
+    BallChar thisChars; //TODO РїРµСЂРµРЅРµСЃС‚Рё РїРѕРґ СЃРїРµС†.РґРѕСЃС‚.private
     bool testWallHit ()
         {
         if (cords.x + radius > txGetExtentX())
@@ -549,7 +549,7 @@ void drawHitTable (Ball balls[], const int bnum, double x1, double y1, double x2
     double ysize = y2 - y1;
     double liney = ysize/(topsnum + 1);
     txLine (x1 + 20, y1, x1 + 20, y2);
-    txDrawText (x1 + 20, y1, x2, y1 + liney, "Лидеры по отскокам");
+    txDrawText (x1 + 20, y1, x2, y1 + liney, "Р›РёРґРµСЂС‹ РїРѕ РѕС‚СЃРєРѕРєР°Рј");
     BallChar chars[bnum];
     initChars (chars, balls, bnum);
     SortBallsCharacteristics (chars, 0, bnum - 1);
