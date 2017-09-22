@@ -17,7 +17,7 @@ struct SUPERDoubPair
 class BallChar
     {
     public:
-    char namech [16] = {};
+    int id;
     int hitnumch = 0;
     };
 
@@ -48,15 +48,15 @@ class Ball
     COLORREF ballcolor;
     COLORREF vectorcolor = RGB (200, 200, 200);
     DoubPair cords;
-    int vectorwidth = 5;
+    int vectorwidth = 5;        a
     double radius;
     double angle;
     int id;
-    char name[16];
     double dt = 1;
     double speed;
     int hitcounter;
     public:
+    char name[16];
     BallChar thisChars; //TODO перенести под спец.дост.private
     bool testWallHit ()
         {
@@ -101,7 +101,7 @@ class Ball
         for (int i = 0; i < 16; i++)
             {
             name[i] = newname[i];
-            thisChars.namech[i] = newname[i];
+            //thisChars.namech[i] = newname[i];
             }
         }
     void setRadius (double grad)
@@ -190,7 +190,7 @@ class Ball
         ballcolor = fcolor;
         *name = *gname;
         hitcounter = 0;
-        *(thisChars.namech) = *gname;
+        //*(thisChars.namech) = *gname;
         id = gid;
         }
     Ball (double xc, double yc, double rad, double ang, double spd, COLORREF fcolor, int number, int gid)
@@ -203,14 +203,14 @@ class Ball
         ballcolor = fcolor;
         sprintf (name, "%d", number);
         hitcounter = 0;
-        sprintf (thisChars.namech, "%d", number);
+        //sprintf (thisChars.namech, "%d", number);
         id = gid;
         }
     Ball ()
         {}
     void makeChar (BallChar *gchar)
         {
-        *(gchar->namech) = *name;
+        //*(gchar->namech) = *name;
         gchar->hitnumch = hitcounter;
         }
     void move()
@@ -342,7 +342,7 @@ class Ball
 
     void setAngle (double get)
         {
-        angle = get ;
+        angle = get;
         }
 
     void setSpeed (double get)
@@ -371,7 +371,7 @@ SUPERDoubPair getBiPolSpeedAfterCollision (double vx1, double vy1, double vx2, d
     DoubPair v1NC = {((mass1 - mass2)*(v1ProjX)+2*mass2*v2ProjX)/(mass1+mass2), v1ProjY};
     DoubPair v2NC = {(2*mass2*v2ProjX+2*mass1*v1ProjX)/(mass1+mass2), v2ProjY};
 
-    printf ("v1ProjX == %f, v2ProjX == %f\n", v1ProjX, v2ProjX);
+    //printf ("v1ProjX == %f, v2ProjX == %f\n", v1ProjX, v2ProjX);
 
     DoubPair v1OC;
     DoubPair v2OC;
@@ -381,6 +381,8 @@ SUPERDoubPair getBiPolSpeedAfterCollision (double vx1, double vy1, double vx2, d
 
     v2OC.x = ProjVec (v2NC.x, v2NC.y, 1, 0);
     v2OC.y = ProjVec (v2NC.x, v2NC.y, 0, 1);
+
+    printf ("DeltaVX1 OldCords == %f, VY - %f\n, DeltaVX2 OldCords == %f, VY - %f\n ", vx1 - v1OC.x, vy1 - v1OC.y, vx2 - v2OC.x, vy2 - v2OC.y);
 
     SUPERDoubPair answer;
     answer.f.y = LengthOf (v1OC.x, v1OC.y);
@@ -541,6 +543,7 @@ void initChars (BallChar chars[], Ball balls[], int size)
     for (int i = 0; i < size; i++)
         {
         chars[i] = balls[i].thisChars;
+        chars[i].id = i;
         }
     }
 
@@ -580,8 +583,8 @@ void drawHitTable (Ball balls[], const int bnum, double x1, double y1, double x2
         txLine (x1, y1 + liney * (i + 1), x2, y1 + liney * (i + 1));
         sprintf (help, "%d", i + 1);
         txDrawText (x1, y1 + liney * (i + 1), x1 + 20, y1 + liney * (i + 2), help);
-        txDrawText (x1 + 20, y1 + liney * (i + 1), x2, y1 + liney * (i + 2), chars[bnum - i - 1].namech);
-        balls[chars[i].id].drawAt(x2 - 10, y1  + liney * (i + 1.5));
+        txDrawText (x1 + 20, y1 + liney * (i + 1), x2, y1 + liney * (i + 2), balls[chars[bnum - i - 1].id].name);
+        balls[chars[bnum - i - 1].id].drawAt(x2 - 10, y1  + liney * (i + 1.5));
         }
     txLine (x1, y2, x2, y2);
     }

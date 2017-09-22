@@ -154,7 +154,7 @@ class Ball
         }
     void draw ()
         {
-        txSelectFont ("Times New Roman", 18);
+        txSelectFont ("Comic Sans MS", 27);
         txSetFillColor (ballcolor);
         txSetColor (ballcolor, 1);
         txCircle (cords.x, cords.y, radius);
@@ -162,13 +162,13 @@ class Ball
         //txLine (cords.x, cords.y,  cords.x - speed * cos(angle ) * 10, cords.y + speed * sin(angle ) * 5);
         myAlphaBlend (txDC(), cords.x - radius, cords.y - radius, radius * 2, radius * 2, tun, 0, 0, 169, 169, 1);
         txSetColor (vectorcolor, vectorwidth);
-        txDrawText (cords.x - radius - 65, cords.y - radius - 25, cords.x + radius + 65, cords.y - radius - 15, name);
+        txDrawText (cords.x - radius - 65, cords.y - radius - 55, cords.x + radius + 65, cords.y - radius - 15, name);
         txLine (cords.x, cords.y,  cords.x + speed * cos(angle ) * 10, cords.y - speed * sin(angle ) * 5);
         }
 
     void drawAt (double x, double y)
         {
-        txSelectFont ("Times New Roman", 18);
+        txSelectFont ("Comic Sans MS", 18);
         txSetFillColor (ballcolor);
         txSetColor (ballcolor, 1);
         txCircle (x, y, radius);
@@ -572,7 +572,8 @@ void drawHitTable (Ball balls[], const int bnum, double x1, double y1, double x2
     double ysize = y2 - y1;
     double liney = ysize/(topsnum + 1);
     txLine (x1 + 20, y1, x1 + 20, y2);
-    txDrawText (x1 + 20, y1, x2, y1 + liney, "Таблица Рекордов по Отскакиваниям");
+    txSelectFont ("Comic Sans MS", 25);
+    txDrawText (x1 + 20, y1, x2, y1 + liney, "Таблица Рекордов\n по Отскакиваниям");
     BallChar chars[bnum];
     initChars (chars, balls, bnum);
     SortBallsCharacteristics (chars, 0, bnum - 1);
@@ -582,6 +583,7 @@ void drawHitTable (Ball balls[], const int bnum, double x1, double y1, double x2
         {
         txLine (x1, y1 + liney * (i + 1), x2, y1 + liney * (i + 1));
         sprintf (help, "%d", i + 1);
+        txSelectFont ("Comic Sans MS", 25);
         txDrawText (x1, y1 + liney * (i + 1), x1 + 20, y1 + liney * (i + 2), help);
         txDrawText (x1 + 20, y1 + liney * (i + 1), x2, y1 + liney * (i + 2), balls[chars[bnum - i - 1].id].name);
         balls[chars[bnum - i - 1].id].drawAt(x2 - 10, y1  + liney * (i + 1.5));
