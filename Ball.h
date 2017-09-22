@@ -17,13 +17,15 @@ struct SUPERDoubPair
 class BallChar
     {
     public:
-    char namech [16] = {};
+    int id;
     int hitnumch = 0;
     };
 
 //void initBalls (Ball balls[], int bnum);
+bool myAlphaBlend (HDC dest, double xDest, double yDest, double width1, double height1,
+                   HDC src,  double xSrc /*= 0*/, double ySrc /*= 0*/, double width2, double height2, double alpha = 1.0);
 double getAccurateAngle (double x, double y);
-DoubPair ProjVec (double x1, double y1, double x2, double y2);
+double ProjVec (double x1, double y1, double x2, double y2);
 double ScalMult (double x1, double y1, double x2, double y2);
 DoubPair DecartToTDiPol (double dx, double dy);
 double LengthOf (double x, double y);
@@ -41,6 +43,7 @@ void change (BallChar chars[], int first, int second);
 class Ball
     {
     private:
+    HDC tun;
     int noCollisionId;
     COLORREF ballcolor;
     COLORREF vectorcolor = RGB (200, 200, 200);
@@ -49,11 +52,11 @@ class Ball
     double radius;
     double angle;
     int id;
-    char name[16];
     double dt = 1;
     double speed;
     int hitcounter;
     public:
+    char name[16];
     BallChar thisChars; //TODO –ø–µ—Ä–µ–Ω–µ—Å—Ç–∏ –ø–æ–¥ —Å–ø–µ—Ü.–¥–æ—Å—Ç.private
     bool testWallHit ()
         {
@@ -98,12 +101,20 @@ class Ball
         for (int i = 0; i < 16; i++)
             {
             name[i] = newname[i];
-            thisChars.namech[i] = newname[i];
+            //thisChars.namech[i] = newname[i];
             }
         }
     void setRadius (double grad)
         {
         radius = grad;
+        }
+    //~Ball()
+    //    {
+    //    txDeleteDC(tun);
+    //   }
+    void setTun (HDC gaveim)
+        {
+        tun = gaveim;
         }
     void setColor (COLORREF gcol)
         {
@@ -147,10 +158,28 @@ class Ball
         txSetFillColor (ballcolor);
         txSetColor (ballcolor, 1);
         txCircle (cords.x, cords.y, radius);
+        //txSetColor (ballcolor, 5);
+        //txLine (cords.x, cords.y,  cords.x - speed * cos(angle ) * 10, cords.y + speed * sin(angle ) * 5);
+        myAlphaBlend (txDC(), cords.x - radius, cords.y - radius, radius * 2, radius * 2, tun, 0, 0, 169, 169, 1);
         txSetColor (vectorcolor, vectorwidth);
         txDrawText (cords.x - radius - 65, cords.y - radius - 25, cords.x + radius + 65, cords.y - radius - 15, name);
         txLine (cords.x, cords.y,  cords.x + speed * cos(angle ) * 10, cords.y - speed * sin(angle ) * 5);
         }
+
+    void drawAt (double x, double y)
+        {
+        txSelectFont ("Times New Roman", 18);
+        txSetFillColor (ballcolor);
+        txSetColor (ballcolor, 1);
+        txCircle (x, y, radius);
+        //txSetColor (ballcolor, 5);
+        //txLine (x, y,  x - speed * cos(angle ) * 10, y + speed * sin(angle ) * 5);
+        myAlphaBlend (txDC(), x - radius, y - radius, radius * 2, radius * 2, tun, 0, 0, 169, 169, 1);
+        txSetColor (vectorcolor, vectorwidth);
+        //txDrawText (x - radius - 65, y - radius - 25, x + radius + 65, y - radius - 15, name);
+        //txLine (x, y,  x + speed * cos(angle ) * 10, y - speed * sin(angle ) * 5);
+        }
+
     Ball (double xc, double yc, double rad, double ang, double spd, COLORREF fcolor, char gname[], int gid)
         {
         cords.x = xc;
@@ -161,7 +190,7 @@ class Ball
         ballcolor = fcolor;
         *name = *gname;
         hitcounter = 0;
-        *(thisChars.namech) = *gname;
+        //*(thisChars.namech) = *gname;
         id = gid;
         }
     Ball (double xc, double yc, double rad, double ang, double spd, COLORREF fcolor, int number, int gid)
@@ -174,21 +203,21 @@ class Ball
         ballcolor = fcolor;
         sprintf (name, "%d", number);
         hitcounter = 0;
-        sprintf (thisChars.namech, "%d", number);
+        //sprintf (thisChars.namech, "%d", number);
         id = gid;
         }
     Ball ()
         {}
     void makeChar (BallChar *gchar)
         {
-        *(gchar->namech) = *name;
+        //*(gchar->namech) = *name;
         gchar->hitnumch = hitcounter;
         }
     void move()
         {
         cords.x += speed * cos(angle ) * dt;
         cords.y -= speed * sin(angle ) * dt;
-        speed *= 1.001;
+        //speed *= 1.001;
         if (dt != 1) dt = 1;
         }
     int GetHitCounter()
@@ -251,8 +280,8 @@ class Ball
         if (noCollisionId == wball.getID())
             {
             noCollisionId = -1;
-            return 0;
             printf ("i've Already had collision with this guy\n");
+            return 0;
             }
 
         double biggerratio;
@@ -313,7 +342,7 @@ class Ball
 
     void setAngle (double get)
         {
-        angle = get ;
+        angle = get;
         }
 
     void setSpeed (double get)
@@ -332,45 +361,36 @@ SUPERDoubPair getBiPolSpeedAfterCollision (double vx1, double vy1, double vx2, d
                                         double cx1, double cy1, double cx2, double cy2,
                                         double mass1, double mass2)
     {
-  //printf ("started\n");
     DoubPair deltac = {cx2 - cx1, cy2 - cy1};
-    //DoubPair nv1;
-    //DoubPair nv2;
-    DoubPair v1ProjX = ProjVec (vx1, vy1, cx2 - cx1, cy2 - cy1);
-    DoubPair v1ProjY = ProjVec (vx1, vy1, cy1 - cy2, cx2 - cx1);
-    double v1pxl = LengthOf (v1ProjX.x, v1ProjX.y);
-    double v1pyl = LengthOf (v1ProjY.x, v1ProjY.y);
-    DoubPair v1NC = {v1pxl, v1pyl};
+    double v1ProjX = ProjVec (vx1, vy1, cx2 - cx1, cy2 - cy1);
+    double v1ProjY = ProjVec (vx1, vy1, cy1 - cy2, cx2 - cx1);
 
+    double v2ProjX = ProjVec (vx2, vy2, cx2 - cx1, cy2 - cy1);
+    double v2ProjY = ProjVec (vx2, vy2, cy1 - cy2, cx2 - cx1);
 
-    DoubPair v2ProjX = ProjVec (vx2, vy2, cx2 - cx1, cy2 - cy1);
-    DoubPair v2ProjY = ProjVec (vx2, vy2, cy1 - cy2, cx2 - cx1);
-    double v2pxl = LengthOf (v2ProjX.x, v2ProjX.y);
-    double v2pyl = LengthOf (v2ProjY.x, v2ProjY.y);
-    DoubPair v2NC = {v2pxl, v2pyl};
+    DoubPair v1NC = {((mass1 - mass2)*(v1ProjX)+2*mass2*v2ProjX)/(mass1+mass2), v1ProjY};
+    DoubPair v2NC = {(2*mass2*v2ProjX+2*mass1*v1ProjX)/(mass1+mass2), v2ProjY};
 
-    DoubPair nv1NC;
-    DoubPair nv2NC;
-    //nv1NC.x = ((mass1 - mass2)*(v1NC.x)+2*mass2*v2NC.x)/(mass1+mass2);
-    nv1NC.x = ((mass1 - mass2)*(vx1)+2*mass2*vx2)/(mass1+mass2);
-    DoubPair help = ProjVec (vx1, vy1, cy2 - cy1, cx1 - cx2);
-    nv1NC.y = help.y;
+    //printf ("v1ProjX == %f, v2ProjX == %f\n", v1ProjX, v2ProjX);
 
-    //nv2NC.x = ((mass2 - mass1)*(v2NC.x)+2*mass1*v1NC.x)/(mass1+mass2);
-    nv2NC.x = (2*mass1*vx1 + (mass2 - mass1)*vx2)/(mass1+mass2);
-  //printf ("---------------------\nnv2NC.x == \n 2*mass1(%f)*vx1(%f) + (m2 - m1)(%f)*vx2(%f)/(m1+m2)(%f)", nv2NC.x, mass1, vx1, mass2-mass1, vx2, mass1+mass2);
-    help = ProjVec (vx2, vy2, cy1 - cy2, cx2 - cx1);
-    nv2NC.y = help.y;
+    DoubPair v1OC;
+    DoubPair v2OC;
+
+    v1OC.x = ProjVec (v1NC.x, v1NC.y, 1, 0);
+    v1OC.y = ProjVec (v1NC.x, v1NC.y, 0, 1);
+
+    v2OC.x = ProjVec (v2NC.x, v2NC.y, 1, 0);
+    v2OC.y = ProjVec (v2NC.x, v2NC.y, 0, 1);
+
+    printf ("DeltaVX1 OldCords == %f, VY - %f\n, DeltaVX2 OldCords == %f, VY - %f\n ", vx1 - v1OC.x, vy1 - v1OC.y, vx2 - v2OC.x, vy2 - v2OC.y);
+
     SUPERDoubPair answer;
-    //printf ("first projection == %f & %f\n", v2ProjX, v2ProjY);
-    answer.f.y = LengthOf (nv1NC.x, nv1NC.y);
-    answer.s.y = LengthOf (nv2NC.x, nv2NC.y);
-    answer.f.x = (getAccurateAngle(nv1NC.x, nv1NC.y) +
+    answer.f.y = LengthOf (v1OC.x, v1OC.y);
+    answer.s.y = LengthOf (v2OC.x, v2OC.y);
+    answer.f.x = (getAccurateAngle(v1OC.x, v1OC.y) +
                     getAccurateAngle(deltac.x, deltac.y));
-    //printf ("stage a\n");
-    answer.s.x = (getAccurateAngle(nv2NC.x, nv2NC.y) +
+    answer.s.x = (getAccurateAngle(v2OC.x, v2OC.y) +
                     getAccurateAngle(deltac.x, deltac.y));
-    //printf ("returning setspeed == %f\n", answer.s.y);
     return answer;
     }
 
@@ -505,14 +525,16 @@ double ScalMult (double x1, double y1, double x2, double y2)
     return x1*x2 + y1*y2;
     }
 
-DoubPair ProjVec (double x1, double y1, double x2, double y2)
+double ProjVec (double x1, double y1, double x2, double y2)
     {
-    DoubPair answer;
+    //DoubPair answer;
+    double answer;
     double dp = ScalMult (x1, y1, x2, y2);
   //printf ("gettingveloc == %f & %f, dp == %f\n", x1, y1, dp);
-    answer.x = (dp/(x2*x2+y2*y2))*x2;
-    answer.y = (dp/(x2*x2+y2*y2))*y2;
+    //answer.x = (dp/(x2*x2+y2*y2))*x2;
+    //answer.y = (dp/(x2*x2+y2*y2))*y2;
   //printf ("returningproj == %f & %f\n", answer.x, answer.y);
+    answer = dp/LengthOf(x2, y2);
     return answer;
     }
 
@@ -521,6 +543,7 @@ void initChars (BallChar chars[], Ball balls[], int size)
     for (int i = 0; i < size; i++)
         {
         chars[i] = balls[i].thisChars;
+        chars[i].id = i;
         }
     }
 
@@ -549,7 +572,7 @@ void drawHitTable (Ball balls[], const int bnum, double x1, double y1, double x2
     double ysize = y2 - y1;
     double liney = ysize/(topsnum + 1);
     txLine (x1 + 20, y1, x1 + 20, y2);
-    txDrawText (x1 + 20, y1, x2, y1 + liney, "–õ–∏–¥–µ—Ä—ã –ø–æ –æ—Ç—Å–∫–æ–∫–∞–º");
+    txDrawText (x1 + 20, y1, x2, y1 + liney, "“‡·ÎËˆ‡ –ÂÍÓ‰Ó‚ ÔÓ ŒÚÒÍ‡ÍË‚‡ÌËˇÏ");
     BallChar chars[bnum];
     initChars (chars, balls, bnum);
     SortBallsCharacteristics (chars, 0, bnum - 1);
@@ -560,7 +583,8 @@ void drawHitTable (Ball balls[], const int bnum, double x1, double y1, double x2
         txLine (x1, y1 + liney * (i + 1), x2, y1 + liney * (i + 1));
         sprintf (help, "%d", i + 1);
         txDrawText (x1, y1 + liney * (i + 1), x1 + 20, y1 + liney * (i + 2), help);
-        txDrawText (x1 + 20, y1 + liney * (i + 1), x2, y1 + liney * (i + 2), chars[bnum - i - 1].namech);
+        txDrawText (x1 + 20, y1 + liney * (i + 1), x2, y1 + liney * (i + 2), balls[chars[bnum - i - 1].id].name);
+        balls[chars[bnum - i - 1].id].drawAt(x2 - 10, y1  + liney * (i + 1.5));
         }
     txLine (x1, y2, x2, y2);
     }
@@ -595,14 +619,15 @@ bool standsright (BallChar chars[], int tests, int mid)
     }
 
 
-void initBalls (Ball balls[], int bnum)
+void initBalls (Ball balls[], int bnum, HDC helptun)
     {
     for (int i = 0; i < bnum; i++)
         {
         Ball hball ((double)(i)/(double)(bnum) * txGetExtentX(), (double)(i)/(double)(bnum) * txGetExtentY(),
-                    20 + i, (i - bnum/2) * 15, 5, RGB ((double)(i)/(double)(bnum)*200 + 55, (double)(i)/(double)(bnum)*200 + 55, (double)(i)/(double)(bnum)*200 + 55), i, i);
+                    20 + i, (i - bnum/2) * 15, 5, RGB (rand()%255, rand()%255, rand()%255), i, i);
 
         balls[i] = hball;
+        balls[i].setTun (helptun);
         }
     }
 
@@ -612,4 +637,24 @@ void change (BallChar chars[], int first, int second)
     helpchar = chars[first];
     chars[first] = chars[second];
     chars[second] = helpchar;
+    }
+
+
+bool myAlphaBlend (HDC dest, double xDest, double yDest, double width1, double height1,
+                   HDC src,  double xSrc /*= 0*/, double ySrc /*= 0*/, double width2, double height2, double alpha /*= 1.0*/)
+    {
+    _TX_IF_TXWINDOW_FAILED        return false;
+    _TX_IF_ARGUMENT_FAILED (dest) return false;
+    _TX_IF_ARGUMENT_FAILED (src)  return false;
+
+    if (alpha < 0) alpha = 0;
+    if (alpha > 1) alpha = 1;
+
+    BLENDFUNCTION blend = { AC_SRC_OVER, 0, (BYTE) ROUND (alpha * 255), AC_SRC_ALPHA };
+    return (Win32::AlphaBlend)?
+        txGDI (!!(Win32::AlphaBlend (dest, ROUND (xDest), ROUND (yDest), ROUND (width1), ROUND (height1),
+                                     src,  ROUND (xSrc),  ROUND (ySrc),  ROUND (width2), ROUND (height2), blend)))
+    :
+        txGDI (!!(Win32::BitBlt     (dest, ROUND (xDest), ROUND (yDest), ROUND (width1), ROUND (height1),
+                                     src,  ROUND (xSrc),  ROUND (ySrc),  SRCCOPY))), false;
     }

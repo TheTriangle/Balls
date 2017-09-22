@@ -9,11 +9,13 @@ void testBalls (Ball balls[], int bnum);
 void initBalls (Ball balls[], int bnum);
 int main()
     {
-    txCreateWindow (800, 600);
+    txCreateWindow (GetSystemMetrics(SM_CXSCREEN), GetSystemMetrics(SM_CYSCREEN));
     //txDisableAutoPause();
     const int bnum = 10;
     Ball balls[bnum];
-    initBalls (balls, bnum);
+    HDC helptun = txLoadImage ("Tun.bmp");
+    tx_auto_func (txDeleteDC(helptun));
+    initBalls (balls, bnum, helptun);
     bool paused = false;
     balls[0].setName ("John");
     balls[1].setName ("Bill");
@@ -21,6 +23,10 @@ int main()
     balls[3].setName ("Ilya");
     balls[4].setName ("Ded");
     balls[5].setName ("Egor");
+
+    int cyclepoint = 0;
+    HDC koteuka = txLoadImage("KOTR.bmp");
+    tx_auto_func (txDeleteDC(koteuka));
 
     while (!GetAsyncKeyState (VK_ESCAPE))
         {
@@ -35,6 +41,7 @@ int main()
             else paused = false;
             }
         if (!paused) moveBalls (balls, bnum);
+        myAlphaBlend(txDC(), txGetExtentX() - 256, txGetExtentY() - 256, 180, 180, koteuka, ((int)(cyclepoint/6) * 128) % 1024, 0, 128, 128, 1);
         //getch();
         //printf ("DoubPaira\n");
         //getch();
@@ -42,9 +49,10 @@ int main()
         //getch();
         //printf ("angle == %f\n", ABall.getAngle());
         txSleep(10);
-        txSetFillColor (TX_BLACK);
+        txSetFillColor (RGB(202, 168, 109));
         txClear();
         //txClearConsole();
+        cyclepoint++;
         }
 
 
