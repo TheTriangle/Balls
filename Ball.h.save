@@ -1,5 +1,9 @@
 #define DEGREEMODIFIER 0.01745
 #define PI 3.141593
+COLORREF textnamescolor = RGB (255, 255, 255);
+COLORREF texttabcolor = RGB (233, 217, 109);
+COLORREF vectorcolor = RGB (255, 255, 255);
+COLORREF tablecolor = RGB(233, 217, 109);
 
 class DoubPair
     {
@@ -17,8 +21,16 @@ struct SUPERDoubPair
 class BallChar
     {
     public:
-    int id;
-    int hitnumch = 0;
+    int idch_;
+    int hitnumch_ = 0;
+    BallChar (int gid, int ghit):
+        idch_(gid),
+        hitnumch_(ghit)
+        {}
+
+    BallChar():
+        idch_(-1)
+        {}
     };
 
 //void initBalls (Ball balls[], int bnum);
@@ -29,8 +41,8 @@ double ProjVec (double x1, double y1, double x2, double y2);
 double ScalMult (double x1, double y1, double x2, double y2);
 DoubPair DecartToTDiPol (double dx, double dy);
 double LengthOf (double x, double y);
-DoubPair DiPolToDecart (double angle, double length);
-SUPERDoubPair getBiPolSpeedAfterCollision (double vx1, double vy1, double vx2, double vy2,
+DoubPair DiPolToDecart (double angle_, double length);
+SUPERDoubPair getBiPolSpeedAfterCollision (double vx_1, double vy_1, double vx_2, double vy_2,
                                         double cx1, double cy1, double cx2, double cy2,
                                         double mass1, double mass2);
 double getDistanceBetween(double x1, double y1, double x2, double y2);
@@ -43,335 +55,445 @@ void change (BallChar chars[], int first, int second);
 class Ball
     {
     private:
-    HDC tun;
-    int noCollisionId;
-    COLORREF ballcolor;
-    COLORREF vectorcolor = RGB (200, 200, 200);
-    DoubPair cords;
-    int vectorwidth = 5;        a
-    double radius;
-    double angle;
-    int id;
-    double dt = 1;
-    double speed;
-    int hitcounter;
+    double radius_;
+    double vx_;
+    double vy_;
+    double speed_;
+    double angle_;
+    COLORREF ballcolor_;
+    int hitcounter_;
+    int id_;
+    DoubPair cords_;
+
+    HDC tun_;
+    int noCollisionId_;
+    int vectorwidth_ = 5;
+    double dt_ = 1;
+
+
     public:
-    char name[16];
-    BallChar thisChars; //TODO РїРµСЂРµРЅРµСЃС‚Рё РїРѕРґ СЃРїРµС†.РґРѕСЃС‚.private
-    bool testWallHit ()
+
+    char name_[16];
+    BallChar thisChars_; //TODO РїРµСЂРµРЅРµСЃС‚Рё РїРѕРґ СЃРїРµС†.РґРѕСЃС‚.private
+
+    bool testWallHit ();
+    void setName (char newname[]);
+    void setRadius (double grad);
+    void setTun (HDC gaveim);
+    void setColor (COLORREF gcol);
+    void setVectorColor (COLORREF gcol, int gwidth = 5);
+    void setCords (double gx, double gy);
+    int getID();
+    double getAngleTo(double xto, double yto);
+    double getX();
+    double getY();
+    DoubPair getCords();
+    void draw ();
+    void drawAt (double x, double y);
+    Ball (DoubPair gcords, double rad, double gvx, double gvy, COLORREF fcolor, char gname[], int gid);
+    Ball (DoubPair gcords, double rad, double gvx, double gvy, COLORREF fcolor, int number, int gid);
+    Ball ();
+    void makeChar (BallChar *gchar);
+    void move();
+    int getHitCounter();
+    double getAngle();
+    double getDistanceTo (double xto, double yto);
+    int makeCollisions (Ball others[], int bnum);
+    double getRadius();
+    double getSpeed();
+    void addCollision (int addnum = 1);
+    void setNoCol (int gid);
+    void moveRatio (double rat);
+    double getAngleBetweenSpeed(double gx, double gy);
+    int makeCollisionWith (Ball* wball);
+    double getvx();
+    double getvy();
+    void setvx (double get);
+    void setvy (double get);
+    void setAngle (double get);
+    void setSpeed (double get);
+    bool testCollDoubPairs (Ball* tball, double tgx, double tgy, double thx, double thy);
+    };
+bool Ball::testWallHit ()
+    {
+    if (cords_.x + radius_ > txGetExtentX())
         {
-        if (cords.x + radius > txGetExtentX())
-            {
-            cords.x = txGetExtentX() - radius;
-            if (angle >= 0) angle = PI - angle;
-            else angle = -PI - angle;
-            return true;
-            hitcounter++;
-            thisChars.hitnumch++;
-            }
-        if (cords.x - radius < 0)
-            {
-            cords.x = radius;
-            if (angle >= 0) angle = PI - angle;
-            else angle = -PI - angle;
-            hitcounter++;
-            thisChars.hitnumch++;
-            return true;
-            }
-        if (cords.y + radius > txGetExtentY())
-            {
-            cords.y = txGetExtentY() - radius;
-            angle = -angle;
-            hitcounter++;
-            thisChars.hitnumch++;
-            return true;
-            }
-        if (cords.y - radius < 0)
-            {
-            cords.y = radius;
-            angle = -angle;
-            hitcounter++;
-            thisChars.hitnumch++;
-            return true;
-            }
-        return false;
+        //cords.x = txGetExtentX() - radius_;
+        //if (angle >= 0) angle_ = PI - angle_;
+        //else angle_ = -PI - angle_;
+        //return true;
+        //hitcounter++;
+        //thisChars.hitnumch_++;
+        if (vx_ > 0) vx_ = -vx_;
+        return true;
         }
-    void setName (char newname[])
+    if (cords_.x - radius_ < 0)
         {
-        for (int i = 0; i < 16; i++)
-            {
-            name[i] = newname[i];
-            //thisChars.namech[i] = newname[i];
-            }
+        //cords.x = radius_;
+        //if (angle >= 0) angle_ = PI - angle_;
+        //else angle_ = -PI - angle_;
+        //hitcounter++;
+        //thisChars.hitnumch_++;
+        if (vx_ < 0) vx_ = -vx_;
+        return true;
         }
-    void setRadius (double grad)
+    if (cords_.y + radius_ > txGetExtentY())
         {
-        radius = grad;
+        //cords.y = txGetExtentY() - radius_;
+        //angle = -angle;
+        //hitcounter++;
+        //thisChars.hitnumch_++;
+        if (vy_ > 0) vy_ = -vy_;
+        return true;
         }
+    if (cords_.y - radius_ < 0)
+        {
+        //cords.y = radius_;
+        //angle = -angle;
+        //hitcounter++;
+        //thisChars.hitnumch_++;
+        if (vy_< 0) vy_ = -vy_;
+        return true;
+        }
+    return false;
+    }
+void Ball::setName (char newname[])
+    {
+    for (int i = 0; i < 16; i++)
+        {
+        name_[i] = newname[i];
+        //thisChars.namech[i] = newname[i];
+        }
+    }
+void Ball::setRadius (double grad)
+    {
+    radius_ = grad;
+    }
     //~Ball()
     //    {
     //    txDeleteDC(tun);
     //   }
-    void setTun (HDC gaveim)
-        {
-        tun = gaveim;
-        }
-    void setColor (COLORREF gcol)
-        {
-        ballcolor = gcol;
-        }
-    void setVectorColor (COLORREF gcol, int gwidth = 5)
-        {
-        vectorcolor = gcol;
-        vectorwidth = gwidth;
-        }
-    void setCords (double gx, double gy)
-        {
-        cords.x = gx;
-        cords.y = gy;
-        }
-    int getID()
-        {
-        return id;
-        }
-    double getAngleTo(double xto, double yto)
-        {
-        assert (fabs((yto - cords.y)/getDistanceTo(xto, yto)) <= 1);
-        return asin((yto - cords.y)/getDistanceTo(xto, yto));
-        }
+void Ball::setTun (HDC gaveim)
+    {
+    tun_ = gaveim;
+    }
+void Ball::setColor (COLORREF gcol)
+    {
+    ballcolor_ = gcol;
+    }
+void Ball::setVectorColor (COLORREF gcol, int gwidth)
+    {
+    vectorcolor = gcol;
+    vectorwidth_ = gwidth;
+    }
+void Ball::setCords (double gx, double gy)
+    {
+    cords_.x = gx;
+    cords_.y = gy;
+    }
+int Ball::getID()
+    {
+    return id_;
+    }
+double Ball::getAngleTo(double xto, double yto)
+    {
+    assert (fabs((yto - cords_.y)/getDistanceTo(xto, yto)) <= 1);
+    return getAccurateAngle(xto - cords_.x, yto - cords_.y);
+    }
 
-    double getX()
-        {
-        return cords.x;
-        }
-    double getY()
-        {
-        return cords.y;
-        }
-    DoubPair getCords()
-        {
-        return cords;
-        }
-    void draw ()
-        {
-        txSelectFont ("Times New Roman", 18);
-        txSetFillColor (ballcolor);
-        txSetColor (ballcolor, 1);
-        txCircle (cords.x, cords.y, radius);
-        //txSetColor (ballcolor, 5);
-        //txLine (cords.x, cords.y,  cords.x - speed * cos(angle ) * 10, cords.y + speed * sin(angle ) * 5);
-        myAlphaBlend (txDC(), cords.x - radius, cords.y - radius, radius * 2, radius * 2, tun, 0, 0, 169, 169, 1);
-        txSetColor (vectorcolor, vectorwidth);
-        txDrawText (cords.x - radius - 65, cords.y - radius - 25, cords.x + radius + 65, cords.y - radius - 15, name);
-        txLine (cords.x, cords.y,  cords.x + speed * cos(angle ) * 10, cords.y - speed * sin(angle ) * 5);
-        }
+double Ball::getX()
+    {
+    return cords_.x;
+    }
+double Ball::getY()
+    {
+    return cords_.y;
+    }
+DoubPair Ball::getCords()
+    {
+    return cords_;
+    }
+void Ball::draw ()
+    {
+    txSelectFont ("Comic Sans SM", 27);
+    txSetFillColor (ballcolor_);
+    txSetColor (ballcolor_, 1);
+    //txLine(cords.x, cords_.y, rand()%txGetExtentX()/2, 0);
+    //txLine(cords.x, cords_.y, txGetExtentX()/2, txGetExtentY());
+    txCircle (cords_.x, cords_.y, radius_);
+    //txSetColor (ballcolor, 5);
+    //txLine (cords.x, cords_.y,  cords_.x - speed_ * cos(angle ) * 10, cords_.y + speed_ * sin(angle ) * 5);
+    myAlphaBlend (txDC(), cords_.x - radius_, cords_.y - radius_, radius_ * 2, radius_ * 2, tun_, 0, 0, 169, 169, 1);
+    txSetColor (vectorcolor, vectorwidth_);
+    txDrawText (cords_.x - radius_ - 65, cords_.y - radius_ - 55, cords_.x + radius_ + 65, cords_.y - radius_ - 15, name_);
+    txLine (cords_.x, cords_.y,  cords_.x + vx_, cords_.y + vy_);
+    }
 
-    void drawAt (double x, double y)
-        {
-        txSelectFont ("Times New Roman", 18);
-        txSetFillColor (ballcolor);
-        txSetColor (ballcolor, 1);
-        txCircle (x, y, radius);
-        //txSetColor (ballcolor, 5);
-        //txLine (x, y,  x - speed * cos(angle ) * 10, y + speed * sin(angle ) * 5);
-        myAlphaBlend (txDC(), x - radius, y - radius, radius * 2, radius * 2, tun, 0, 0, 169, 169, 1);
-        txSetColor (vectorcolor, vectorwidth);
-        //txDrawText (x - radius - 65, y - radius - 25, x + radius + 65, y - radius - 15, name);
-        //txLine (x, y,  x + speed * cos(angle ) * 10, y - speed * sin(angle ) * 5);
-        }
+void Ball::drawAt (double x, double y)
+    {
+    txSelectFont ("Comic Sans SM", 18);
+    txSetFillColor (ballcolor_);
+    txSetColor (ballcolor_, 1);
+    txCircle (x, y, radius_);
+    //txSetColor (ballcolor, 5);
+    //txLine (x, y,  x - speed_ * cos(angle ) * 10, y + speed_ * sin(angle ) * 5);
+    myAlphaBlend (txDC(), x - radius_, y - radius_, radius_ * 2, radius_ * 2, tun_, 0, 0, 169, 169, 1);
+    txSetColor (vectorcolor, vectorwidth_);
+    //txDrawText (x - radius_ - 65, y - radius_ - 25, x + radius_ + 65, y - radius_ - 15, name_);
+    //txLine (x, y,  x + speed_ * cos(angle ) * 10, y - speed_ * sin(angle ) * 5);
+    }
 
-    Ball (double xc, double yc, double rad, double ang, double spd, COLORREF fcolor, char gname[], int gid)
-        {
-        cords.x = xc;
-        cords.y = yc;
-        radius = rad;
-        angle = ang ;
-        speed = spd;
-        ballcolor = fcolor;
-        *name = *gname;
-        hitcounter = 0;
-        //*(thisChars.namech) = *gname;
-        id = gid;
-        }
-    Ball (double xc, double yc, double rad, double ang, double spd, COLORREF fcolor, int number, int gid)
-        {
-        cords.x = xc;
-        cords.y = yc;
-        radius = rad;
-        angle = ang ;
-        speed = spd;
-        ballcolor = fcolor;
-        sprintf (name, "%d", number);
-        hitcounter = 0;
-        //sprintf (thisChars.namech, "%d", number);
-        id = gid;
-        }
-    Ball ()
-        {}
-    void makeChar (BallChar *gchar)
-        {
-        //*(gchar->namech) = *name;
-        gchar->hitnumch = hitcounter;
-        }
-    void move()
-        {
-        cords.x += speed * cos(angle ) * dt;
-        cords.y -= speed * sin(angle ) * dt;
-        //speed *= 1.001;
-        if (dt != 1) dt = 1;
-        }
-    int GetHitCounter()
-        {
-        return hitcounter;
-        }
-    double getAngle()
-        {
-        return angle;
-        }
-    double getDistanceTo (double xto, double yto)
-        {
-        return sqrt((xto - cords.x) * (xto - cords.x) +
-                    (yto - cords.y) * (yto - cords.y));
-        }
+Ball::Ball (DoubPair gcords, double rad, double gvx, double gvy, COLORREF fcolor, char gname[], int gid):
+    radius_(rad),
+    vx_(gvx),
+    vy_(gvy),
+    speed_(LengthOf(gvx, gvy)),
+    angle_(getAccurateAngle(gvx, gvy)),
+    ballcolor_(fcolor),
+    hitcounter_(0),
+    //*(thisChars.namech)(*gname),
+    id_(gid),
+    cords_(gcords),
+    tun_ (NULL),
+    noCollisionId_ (0),
+    thisChars_(-1, 0)
+    {
+    *name_ = *gname;
+    }
+Ball::Ball (DoubPair gcords, double rad, double gvx, double gvy, COLORREF fcolor, int number, int gid):
+    radius_(rad),
+    vx_(gvx),
+    vy_(gvy),
+    speed_(LengthOf(gvx, gvy)),
+    angle_(getAccurateAngle(gvx, gvy)),
+    ballcolor_(fcolor),
+    hitcounter_(0),
+    //sprintf (thisChars.namech, "%d", number)),
+    id_(gid),
+    cords_(gcords),
+    tun_ (NULL),
+    noCollisionId_ (0),
+    thisChars_(-1, 0)
+    {
+    sprintf (name_, "%d", number);
+    }
+Ball::Ball ():
+    radius_(10),
+    vx_(0),
+    vy_(0),
+    speed_(LengthOf(0, 0)),
+    angle_(getAccurateAngle(0, 0)),
+    ballcolor_(RGB (0, 204, 204)),
+    hitcounter_(0),
+    //sprintf (thisChars.namech, "%d", number)),
+    id_(-2),
+    cords_({-100, -100}),
+    tun_ (NULL),
+    noCollisionId_ (0),
+    thisChars_(-1, 0)
+    {
+    sprintf (name_, "Unnamed");
+    }
+void Ball::makeChar (BallChar *gchar)
+    {
+    //*(gchar->namech) = *name;
+    gchar->hitnumch_ = hitcounter_;
+    }
+void Ball::move()
+    {
+    //if (vx > 20) vx_ = 20;
+    //if (vy > 20) vy_ = 20;
+    //if (vx < -20) vx_ = -20;
+    //if (vy < -20) vy_ = -20;
+    cords_.x += vx_;
+    cords_.y += vy_;
+    //speed *= 1.001;
+    if (fabs(dt_ - 1) > 0) dt_ = 1;
+    }
+int Ball::getHitCounter()
+    {
+    return hitcounter_;
+    }
+double Ball::getAngle()
+    {
+    return angle_;
+    }
+double Ball::getDistanceTo (double xto, double yto)
+    {
+    return sqrt((xto - cords_.x) * (xto - cords_.x) +
+                (yto - cords_.y) * (yto - cords_.y));
+    }
 
-    void makeCollisions (Ball others[], int bnum)
+int Ball::makeCollisions (Ball others[], int bnum)
+    {
+    for (int i = 0; i < bnum; i++)
         {
-        for (int i = 0; i < bnum; i++)
+        //printf ("id %d\n", others[i].getID());
+        if (others[i].getID() != id_ &&
+                    others[i].getDistanceTo (cords_.x, cords_.y) <=
+                    others[i].getSpeed() + speed_ + others[i].getRadius() + radius_)
             {
-            //printf ("id %d\n", others[i].getID());
-            if (others[i].getID() != id &&
-                        others[i].getDistanceTo (cords.x, cords.y) <=
-                        others[i].getSpeed() + speed + others[i].getRadius() + radius)
-                {
-                //printf ("OOUCH\n");
-                makeCollisionWith (others[i]);
-                //getch();
-                }
+            //printf ("OOUCH\n");
+            //if (fabs (getAngleBetweenSpeed(others[i].getX(), others[i].getY())) < PI/1.3)
+            //    {
+            makeCollisionWith (&others[i]);// == 1) others[i].makeCollisionWith(this);
+            //    }
+            //getch();
             }
         }
-    double getRadius()
-        {
-        return radius;
-        }
-    double getSpeed()
-        {
-        return speed;
-        }
-    void addCollision (int addnum = 1)
-        {
-        hitcounter += addnum;
-        thisChars.hitnumch += addnum;
-        }
+    return 0;
+    }
+double Ball::getRadius()
+    {
+    return radius_;
+    }
+double Ball::getSpeed()
+    {
+    return LengthOf(vx_, vy_);
+    }
+void Ball::addCollision (int addnum)
+    {
+    hitcounter_ += addnum;
+    thisChars_.hitnumch_ += addnum;
+    }
 
-    void setNoCol (int gid)
+void Ball::setNoCol (int gid)
+    {
+    noCollisionId_ = gid;
+    }
+
+void Ball::moveRatio (double rat)
+    {
+    cords_.x += vx_*rat;
+    cords_.y += vy_*rat;
+    }
+
+double Ball::getAngleBetweenSpeed(double gx, double gy)
+    {
+    return getAccurateAngle(vx_, vy_) - this->getAngleTo(gx, gy);
+    }
+
+int Ball::makeCollisionWith (Ball* wball)
+    {
+    //if (noCollisionId == wball->getID())
+    //    {
+    //    noCollisionId_ = -1;
+    //    printf ("i've Already had collision with this guy\n");
+    //    return 0;
+    //    }
+
+    double biggerratio;
+    //double biggerspeed;
+    //double biggerradius;
+    if (LengthOf(wball->getvx(), wball->getvy())/wball->getRadius() > speed_/radius_)
         {
-        noCollisionId = gid;
+        biggerratio = LengthOf(wball->getvx(), wball->getvy())/wball->getRadius()*3.3;
+        //biggerspeed = LengthOf(wball->getvx(), wball->getvy());
+        //biggerradius = wball->getRadius();
         }
-
-    void moveRatio (double rat)
-        {
-        cords.x += speed*cos(angle)*rat;
-        cords.y -= speed*sin(angle)*rat;
+    else          //TODO
+        {         //
+        biggerratio = LengthOf(vx_, vy_)/radius_*3.3;
+        //biggerspeed = LengthOf(vx_, vy_);
+        //biggerradius = radius_;
         }
-
-
-    int makeCollisionWith (Ball wball)
+    int retnum = 0;
+    for (int i = 0; i < biggerratio; i++)
         {
-        if (noCollisionId == wball.getID())
+        if (testCollDoubPairs (wball, wball->getX() + vx_ * (double)(i)/(double)(biggerratio),
+                                    wball->getY() + vy_ * (double)(i)/(double)(biggerratio),
+                                    cords_.x + vx_ * (double)(i)/(double)(biggerratio),
+                                    cords_.y + vy_ * (double)(i)/(double)(biggerratio)))
             {
-            noCollisionId = -1;
-            printf ("i've Already had collision with this guy\n");
-            return 0;
+            //printf ("OUCH(%s)\n", name_);
+            //1 - i/biggerratio;
+            this->addCollision();
+            //angle = (getAngleTo(wball->getX(), wball->getY()) + 180) + angle_;
+            DoubPair dcv1 = {vx_, vy_};
+            DoubPair dcv2 = {wball->getvx(), wball->getvy()};
+            //printf ("dcv1 == %f && %f", dcv1.x, dcv1.y);
+            //getch();
+            double help = (double)(i - 1)/biggerratio;
+            dt_ = 1 - help;
+            cords_.x += vx_*help;
+            cords_.y += vy_*help;
+            wball->moveRatio (help);
+            SUPERDoubPair colresults;
+            colresults = getBiPolSpeedAfterCollision (dcv1.x, dcv1.y, dcv2.x, dcv2.y,
+                                    cords_.x, cords_.y, wball->getX(), wball->getY(),
+                                    radius_, wball->getRadius());
+            //printf ("v2given == %f, %f\nreturned == %f, %f\n", dcv2.x, dcv2.y, colresults.s.x, colresults.s.y);
+            //printf ("v1given == %f, %f\nreturned == %f, %f\n", dcv1.x, dcv1.y, colresults.f.x, colresults.f.y);
+            //printf ("i am first(%s)\n", name_);
+            //txSetColor (TX_WHITE, 10);
+            //txLine (txGetExtentX()/2, txGetExtentY()/2, txGetExtentX()/2 + dcv2.x * 10, txGetExtentY()/2 + dcv2.y * 10);
+            //txSetColor (TX_GREEN, 10);
+            //txLine (txGetExtentX()/2, txGetExtentY()/2, txGetExtentX()/2 + colresults.s.x * 10, txGetExtentY()/2 + colresults.s.y * 10);
+            //getch();
+            vx_ = colresults.f.x;
+            vy_ = colresults.f.y;
+            wball->vx_ = colresults.s.x;
+            wball->vy_ = colresults.s.y;
+        //getch();
+            retnum = 1;
             }
-
-        double biggerratio;
-        double biggerspeed;
-        double biggerradius;
-        if (wball.getSpeed()/wball.getRadius() > speed/radius)
-            {
-            biggerratio = wball.getSpeed()/wball.getRadius() * 2;
-            biggerspeed = wball.getSpeed();
-            biggerradius = wball.getRadius();
-            }
-        else          //TODO
-            {         //
-            biggerratio = speed/radius * 2;
-            biggerspeed = speed;
-            biggerradius = radius;
-            }
-
-        for (int i = 0; i < biggerratio; i++)
-            {
-            if (testCollDoubPairs (wball, wball.getX() + cos (wball.getAngle()) * i/biggerratio,
-                                       wball.getY() - cos (wball.getAngle()) * i/biggerratio,
-                                       cords.x + cos (angle) * i/biggerratio,
-                                       cords.y - cos (angle) * i/biggerratio))
-                {
-              //printf ("OUCH(%s)\n", name);
-                //1 - i/biggerratio;
-                this->addCollision();
-                //angle = (getAngleTo(wball.getX(), wball.getY()) + 180) + angle;
-                DoubPair dcv1 = DiPolToDecart (angle, speed);
-                DoubPair dcv2 = DiPolToDecart (wball.getAngle(), wball.getSpeed());
-              //printf ("dcv1 == %f && %f", dcv1.x, dcv1.y);
-                //getch();
-                double help = (double)(i - 1)/biggerratio;
-                dt = 1 - help;
-                cords.x += speed*cos(angle)*help;
-                cords.y -= speed*sin(angle)*help;
-                wball.moveRatio (help);
-                SUPERDoubPair colresults;
-                colresults = getBiPolSpeedAfterCollision (dcv1.x, dcv1.y, dcv2.x, dcv2.y,
-                                        cords.x, cords.y, wball.getX(), wball.getY(),
-                                        radius, wball.getRadius());
-                angle = colresults.f.x;
-                speed = colresults.f.y;
-                wball.setAngle (colresults.s.x);
-                wball.setSpeed (colresults.s.y);
-
-                if (angle > 0) angle = (int)(angle)%360;
-                else angle = -((int)(fabs(angle))%360);
-                //getch();
-
-                }
-            return 0;
-
-            }
-        wball.setNoCol(id);
         }
+    wball->setNoCol(id_);
+    return retnum;
+    }
 
-    void setAngle (double get)
-        {
-        angle = get;
-        }
+double Ball::getvx()
+    {
+    return vx_;
+    }
 
-    void setSpeed (double get)
-        {
-        speed = get;
-        }
+double Ball::getvy()
+    {
+    return vy_;
+    }
 
-    bool testCollDoubPairs (Ball tball, double tgx, double tgy, double thx, double thy)
-        {
-        if (getDistanceBetween (tgx, tgy, thx, thy) <= tball.getRadius() + radius) return true;
-        return false;
-        }
-    };
+void Ball::setvx (double get)
+    {
+    vx_ = get;
+    }
+
+void Ball::setvy (double get)
+    {
+    vy_ = get;
+    }
+
+void Ball::setAngle (double get)
+    {
+    angle_ = get;
+    }
+
+void Ball::setSpeed (double get)
+    {
+    speed_ = get;
+    }
+
+bool Ball::testCollDoubPairs (Ball* tball, double tgx, double tgy, double thx, double thy)
+    {
+    if (getDistanceBetween (tgx, tgy, thx, thy) <= tball->getRadius() + radius_) return true;
+    return false;
+    }
+
 
 SUPERDoubPair getBiPolSpeedAfterCollision (double vx1, double vy1, double vx2, double vy2,
                                         double cx1, double cy1, double cx2, double cy2,
                                         double mass1, double mass2)
     {
-    DoubPair deltac = {cx2 - cx1, cy2 - cy1};
+    //DoubPair deltac = {cx2 - cx1, cy2 - cy1};
     double v1ProjX = ProjVec (vx1, vy1, cx2 - cx1, cy2 - cy1);
     double v1ProjY = ProjVec (vx1, vy1, cy1 - cy2, cx2 - cx1);
 
     double v2ProjX = ProjVec (vx2, vy2, cx2 - cx1, cy2 - cy1);
     double v2ProjY = ProjVec (vx2, vy2, cy1 - cy2, cx2 - cx1);
 
+    //printf ("hitted\n");
     DoubPair v1NC = {((mass1 - mass2)*(v1ProjX)+2*mass2*v2ProjX)/(mass1+mass2), v1ProjY};
-    DoubPair v2NC = {(2*mass2*v2ProjX+2*mass1*v1ProjX)/(mass1+mass2), v2ProjY};
+    DoubPair v2NC = {((mass2 - mass1)*(v2ProjX)+2*mass1*v1ProjX)/(mass1+mass2), v2ProjY};
 
-    //printf ("v1ProjX == %f, v2ProjX == %f\n", v1ProjX, v2ProjX);
 
     DoubPair v1OC;
     DoubPair v2OC;
@@ -382,15 +504,15 @@ SUPERDoubPair getBiPolSpeedAfterCollision (double vx1, double vy1, double vx2, d
     v2OC.x = ProjVec (v2NC.x, v2NC.y, 1, 0);
     v2OC.y = ProjVec (v2NC.x, v2NC.y, 0, 1);
 
-    printf ("DeltaVX1 OldCords == %f, VY - %f\n, DeltaVX2 OldCords == %f, VY - %f\n ", vx1 - v1OC.x, vy1 - v1OC.y, vx2 - v2OC.x, vy2 - v2OC.y);
+    //printf ("v2given == %f, %f\nreturned == %f, %f\n", vx_2, vy_2, v2OC.x, v2OC.y);
+    //printf ("v1given == %f, %f\nreturned == %f, %f\n", vx_1, vy_1, v1OC.x, v1OC.y);
+    //printf ("DeltaVX1 OldCords == %f, vy_ - %f\n, DeltaVX2 OldCords == %f, vy_ - %f\n ", vx_1 - v1OC.x, vy_1 - v1OC.y, vx_2 - v2OC.x, vy_2 - v2OC.y);
 
     SUPERDoubPair answer;
-    answer.f.y = LengthOf (v1OC.x, v1OC.y);
-    answer.s.y = LengthOf (v2OC.x, v2OC.y);
-    answer.f.x = (getAccurateAngle(v1OC.x, v1OC.y) +
-                    getAccurateAngle(deltac.x, deltac.y));
-    answer.s.x = (getAccurateAngle(v2OC.x, v2OC.y) +
-                    getAccurateAngle(deltac.x, deltac.y));
+    answer.f.x = v1OC.x;
+    answer.f.y = v1OC.y;
+    answer.s.x = v2OC.x;
+    answer.s.y = v2OC.y;
     return answer;
     }
 
@@ -421,7 +543,7 @@ int SortBallsCharacteristics (BallChar chars[], int left, int right)
     if (right <= left) return 0;
     if (right == left + 1)
         {
-        if (chars[left].hitnumch > chars[right].hitnumch)
+        if (chars[left].hitnumch_ > chars[right].hitnumch_)
             {
             change (chars, left, right);
             }
@@ -435,11 +557,11 @@ int SortBallsCharacteristics (BallChar chars[], int left, int right)
     while (left <= right)
         {
     // //printf ("\nleft(%d) <= right(%d)\n", left, right);
-        midnum = chars [midel].hitnumch;
+        midnum = chars [midel].hitnumch_;
     //  //printf ("mid(%d) == %d\n", midel, midnum);
         if (!standsright (chars, left, midel)/* && right != left*/)
             {
-    //      //printf ("\nleft(%d) == %d stays wrong\nrights ", left, chars[left].hitnumch);
+    //      //printf ("\nleft(%d) == %d stays wrong\nrights ", left, chars[left].hitnumch_);
             if (left > midel && right > midel)
                 {
     //          //printf ("left and right both > mid => changing left and mid - 1 el\n");
@@ -459,24 +581,24 @@ int SortBallsCharacteristics (BallChar chars[], int left, int right)
                 {
                 while (standsright (chars, right, midel)/* || (right == left && right != midel)*/)
                     {
-    //              //printf ("(%d) == %d ", right, chars[right].hitnumch);
+    //              //printf ("(%d) == %d ", right, chars[right].hitnumch_);
                     right--;
                     }
     //          //printf ("stay right\n");
-    //          //printf ("and right(%d) == %d stays wrong\n", right, chars[right].hitnumch);
+    //          //printf ("and right(%d) == %d stays wrong\n", right, chars[right].hitnumch_);
                 change (chars, left, right);
-    //          //printf ("changing left(%d) == %d and it\n", left, chars[left].hitnumch);
+    //          //printf ("changing left(%d) == %d and it\n", left, chars[left].hitnumch_);
                 if (midel == right)
                     {
                     midel = left;
-    //              //printf ("midel is now %d == %d\n", midel, chars[midel].hitnumch);
+    //              //printf ("midel is now %d == %d\n", midel, chars[midel].hitnumch_);
                     }
                 else
                     {
                     if (midel == left)
                         {
                         midel = right;
-    //                  //printf ("midel is now %d == %d\n", midel, chars[midel].hitnumch);
+    //                  //printf ("midel is now %d == %d\n", midel, chars[midel].hitnumch_);
                         }
                     }
                 }
@@ -498,7 +620,7 @@ void printchars (BallChar chars[], int left, int right)
     {
     for (int i = left; i <= right; i++)
         {
-      //printf ("%d ", chars[i].hitnumch);
+      //printf ("%d ", chars[i].hitnumch_);
         }
   //printf ("\n");
     }
@@ -542,8 +664,8 @@ void initChars (BallChar chars[], Ball balls[], int size)
     {
     for (int i = 0; i < size; i++)
         {
-        chars[i] = balls[i].thisChars;
-        chars[i].id = i;
+        chars[i] = balls[i].thisChars_;
+        chars[i].idch_ = i;
         }
     }
 
@@ -567,12 +689,14 @@ void moveBalls (Ball balls[], int bnum)
 
 void drawHitTable (Ball balls[], const int bnum, double x1, double y1, double x2, double y2, int topsnum)
     {
-    txSetColor (TX_WHITE, 1);
+    txSetColor (tablecolor, 5);
     double xsize = x2 - x1;
     double ysize = y2 - y1;
     double liney = ysize/(topsnum + 1);
     txLine (x1 + 20, y1, x1 + 20, y2);
-    txDrawText (x1 + 20, y1, x2, y1 + liney, "Таблица Рекордов по Отскакиваниям");
+    txSetColor (vectorcolor, 5);
+    txSelectFont ("Comic Sans SM", 25);
+    txDrawText (x1 + 20, y1 + 8, x2, y1 + liney + 8, "Они навсегда в\n наших сердцах.");
     BallChar chars[bnum];
     initChars (chars, balls, bnum);
     SortBallsCharacteristics (chars, 0, bnum - 1);
@@ -580,12 +704,16 @@ void drawHitTable (Ball balls[], const int bnum, double x1, double y1, double x2
     char help[16] = {};
     for (int i = 0; i < topsnum; i++)
         {
+        txSetColor (tablecolor, 5);
         txLine (x1, y1 + liney * (i + 1), x2, y1 + liney * (i + 1));
+        txSetColor (vectorcolor, 5);
         sprintf (help, "%d", i + 1);
-        txDrawText (x1, y1 + liney * (i + 1), x1 + 20, y1 + liney * (i + 2), help);
-        txDrawText (x1 + 20, y1 + liney * (i + 1), x2, y1 + liney * (i + 2), balls[chars[bnum - i - 1].id].name);
-        balls[chars[bnum - i - 1].id].drawAt(x2 - 10, y1  + liney * (i + 1.5));
+        txSelectFont ("Comic Sans SM", 25);
+        txDrawText (x1 - 3, y1 + liney * (i + 1), x1 + 17, y1 + liney * (i + 2), help);
+        txDrawText (x1 + 20, y1 + liney * (i + 1), x2, y1 + liney * (i + 2), balls[chars[bnum - i - 1].idch_].name_);
+        balls[chars[bnum - i - 1].idch_].drawAt(x2 - 10, y1  + liney * (i + 1.5));
         }
+    txSetColor (tablecolor, 5);
     txLine (x1, y2, x2, y2);
     }
 
@@ -609,11 +737,11 @@ bool standsright (BallChar chars[], int tests, int mid)
     {
     if (tests < mid)
         {
-        if (chars[tests].hitnumch < chars[mid].hitnumch) return true;
+        if (chars[tests].hitnumch_ < chars[mid].hitnumch_) return true;
         }
     else
         {
-        if (chars[tests].hitnumch > chars[mid].hitnumch) return true;
+        if (chars[tests].hitnumch_ > chars[mid].hitnumch_) return true;
         }
     return false;
     }
@@ -623,8 +751,8 @@ void initBalls (Ball balls[], int bnum, HDC helptun)
     {
     for (int i = 0; i < bnum; i++)
         {
-        Ball hball ((double)(i)/(double)(bnum) * txGetExtentX(), (double)(i)/(double)(bnum) * txGetExtentY(),
-                    20 + i, (i - bnum/2) * 15, 5, RGB (rand()%255, rand()%255, rand()%255), i, i);
+        Ball hball ({(double)(i)/(double)(bnum) * txGetExtentX(), (double)(i)/(double)(bnum) * txGetExtentY()},
+                    20 + i, /*rand()%20 - 10*/rand()%20 - 10, /*rand()%20 - 10*/rand()%20 - 10, RGB (rand()%255, rand()%255, rand()%255), i, i);
 
         balls[i] = hball;
         balls[i].setTun (helptun);
